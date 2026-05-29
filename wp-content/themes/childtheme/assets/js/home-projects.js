@@ -47,8 +47,13 @@
 
   const CONFIG = {
     galleryEase: 0.055,
+    mobileGalleryEase: 0.092,
     galleryDragSpeed: 1.25,
+    mobileGalleryDragSpeed: 1.62,
     galleryWheelSpeed: 0.85,
+    mobileGalleryWheelSpeed: 1.08,
+    mobileReleaseMomentum: 15,
+    mobileReleaseMax: 680,
     horizontalGalleryEase: 0.036,
     mobileHorizontalGalleryEase: 0.068,
     horizontalDragSpeed: 0.72,
@@ -98,6 +103,8 @@
   const snapPixel = (value, scale = window.devicePixelRatio || 1) => Math.round(value * scale) / scale;
   const isSnakeView = () => document.body.classList.contains(CLASSES.snakeView);
   const isLocked = () => document.body.classList.contains(CLASSES.locked);
+  const hoverMediaQuery = window.matchMedia?.('(hover: hover) and (pointer: fine)');
+  const canUseHover = () => hoverMediaQuery?.matches || false;
   const getViewportState = () => {
     const width = window.innerWidth;
     return {
@@ -159,6 +166,9 @@
   });
   const safePlay = video => video?.play?.().catch(() => {});
   const getEventAxis = event => (event.touches ? event.touches[0] : event).clientX;
+  const getGalleryEase = viewport => (viewport.isMobile ? CONFIG.mobileGalleryEase : CONFIG.galleryEase);
+  const getGalleryDragSpeed = viewport => (viewport.isMobile ? CONFIG.mobileGalleryDragSpeed : CONFIG.galleryDragSpeed);
+  const getGalleryWheelSpeed = viewport => (viewport.isMobile ? CONFIG.mobileGalleryWheelSpeed : CONFIG.galleryWheelSpeed);
   const getHorizontalEase = viewport => (viewport.isMobile ? CONFIG.mobileHorizontalGalleryEase : CONFIG.horizontalGalleryEase);
   const getHorizontalDragSpeed = viewport => (viewport.isMobile ? CONFIG.mobileHorizontalDragSpeed : CONFIG.horizontalDragSpeed);
   const getHorizontalWheelSpeed = viewport => (viewport.isMobile ? CONFIG.mobileHorizontalWheelSpeed : CONFIG.horizontalWheelSpeed);
@@ -510,7 +520,14 @@
       this.snakeIntensityTarget = 0;
       this.lastRenderAt = performance.now();
       this.resizeFrame = 0;
-      this.drag = { start: 0, down: false, moved: false, suppressClickUntil: 0 };
+      this.drag = {
+        start: 0,
+        down: false,
+        moved: false,
+        suppressClickUntil: 0,
+        velocity: 0,
+        lastMoveAt: 0,
+      };
       this.boundRows = new WeakSet();
       this.hoverTargets = new WeakMap();
       this.hoverValues = new WeakMap();
@@ -585,13 +602,16 @@
     bindRowHover(row) {
       if (this.boundRows.has(row)) return;
       this.boundRows.add(row);
+      if (!canUseHover()) return;
 
-      row.addEventListener('pointerenter', () => {
+      row.addEventListener('pointerenter', event => {
+        if (!canUseHover() || event.pointerType === 'touch') return;
         this.hoverTargets.set(row, 1);
         this.wake();
       });
 
-      row.addEventListener('pointerleave', () => {
+      row.addEventListener('pointerleave', event => {
+        if (!canUseHover() || event.pointerType === 'touch') return;
         this.hoverTargets.set(row, 0);
         this.wake();
       });
@@ -613,7 +633,7 @@
       window.addEventListener('wheel', event => {
         if (isLocked()) return;
         const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
-        const speed = isSnakeView() ? CONFIG.galleryWheelSpeed : getHorizontalWheelSpeed(this.viewport);
+        const speed = isSnakeView() ? getGalleryWheelSpeed(this.viewport) : getHorizontalWheelSpeed(this.viewport);
         const movement = delta * speed;
         this.target += movement;
         this.pushVelocityImpulse(movement);
@@ -649,16 +669,23 @@
       this.drag.down = true;
       this.drag.moved = false;
       this.drag.start = getEventAxis(event);
+      this.drag.velocity = 0;
+      this.drag.lastMoveAt = performance.now();
     }
 
     pointerMove(event) {
       if (!this.drag.down) return;
 
+      const now = performance.now();
       const current = getEventAxis(event);
-      const speed = isSnakeView() ? CONFIG.galleryDragSpeed : getHorizontalDragSpeed(this.viewport);
+      const speed = isSnakeView() ? getGalleryDragSpeed(this.viewport) : getHorizontalDragSpeed(this.viewport);
       const delta = (this.drag.start - current) * speed;
+      const elapsed = Math.max(12, Math.min(80, now - (this.drag.lastMoveAt || now)));
+      const frameVelocity = (delta / elapsed) * 16.67;
 
       this.drag.start = current;
+      this.drag.lastMoveAt = now;
+      this.drag.velocity = (this.drag.velocity * 0.34) + (frameVelocity * 0.66);
       if (Math.abs(delta) > 1) {
         this.drag.moved = true;
         this.drag.suppressClickUntil = performance.now() + CONFIG.dragClickSuppressMs;
@@ -671,10 +698,24 @@
     pointerUp() {
       if (this.drag.moved) {
         this.drag.suppressClickUntil = performance.now() + CONFIG.dragClickSuppressMs;
+        this.applyReleaseMomentum();
       }
       this.drag.down = false;
       this.wake();
       setTimeout(() => { this.drag.moved = false; }, CONFIG.dragClickSuppressMs);
+    }
+
+    applyReleaseMomentum() {
+      if (!this.viewport.isMobile || Math.abs(this.drag.velocity) < 0.25) return;
+
+      const throwDistance = clamp(
+        -CONFIG.mobileReleaseMax,
+        CONFIG.mobileReleaseMax,
+        this.drag.velocity * CONFIG.mobileReleaseMomentum
+      );
+
+      this.target += throwDistance;
+      this.pushVelocityImpulse(throwDistance);
     }
 
     isDragging() {
@@ -722,7 +763,7 @@
         return;
       }
 
-      const ease = isSnakeView() ? CONFIG.galleryEase : getHorizontalEase(this.viewport);
+      const ease = isSnakeView() ? getGalleryEase(this.viewport) : getHorizontalEase(this.viewport);
       const delta = this.target - this.current;
       const previous = this.current;
 
@@ -795,14 +836,17 @@
     }
 
     renderSnakeGallery() {
-      let keepRendering = true;
+      let keepRendering = !this.viewport.isMobile;
       const now = performance.now();
-      const idleStrength = 1 - clamp(0, 1, this.snakeIntensity / CONFIG.snakeSpeedMaxIntensity);
+      const idleStrength = this.viewport.isMobile
+        ? 0
+        : 1 - clamp(0, 1, this.snakeIntensity / CONFIG.snakeSpeedMaxIntensity);
       const idleWaveTime = now * CONFIG.snakeIdleWaveSpeed;
       const progress = wrap(0, this.singleSetWidth, this.current) / this.singleSetWidth;
       const unitOffset = progress * this.originalCount;
       const speedDirection = clamp(-1, 1, this.scrollDirection / (this.viewport.isMobile ? 12 : 18));
       const speedMass = clamp(0, 1, this.snakeIntensity / CONFIG.snakeSpeedMaxIntensity);
+      const hoverEnabled = canUseHover();
 
       this.items.forEach(item => {
         const { row } = item;
@@ -815,8 +859,8 @@
         const visualCenter = (sequenceIndex * pitch) + (pitch * 0.35) - (this.viewport.width * viewportShift);
         const offsetX = visualCenter - item.left - (item.width / 2);
         const pose = getSnakePose(visualCenter, this.viewport, this.snakeIntensity);
-        const hoverTarget = this.hoverTargets.get(row) || 0;
-        const hoverCurrent = this.hoverValues.get(row) || 0;
+        const hoverTarget = hoverEnabled ? (this.hoverTargets.get(row) || 0) : 0;
+        const hoverCurrent = hoverEnabled ? (this.hoverValues.get(row) || 0) : 0;
         const hover = hoverCurrent + ((hoverTarget - hoverCurrent) * 0.14);
         const hoverLift = -46 * hover;
         const idleWave = Math.sin(idleWaveTime + (item.index * CONFIG.snakeIdleWavePhase)) *
@@ -827,7 +871,7 @@
         const inertiaRotate = speedDirection * speedMass * (this.viewport.isMobile ? 0.42 : 0.78);
 
         this.hoverValues.set(row, hover);
-        keepRendering = keepRendering || Math.abs(hover - hoverTarget) > 0.001;
+        keepRendering = keepRendering || (hoverEnabled && Math.abs(hover - hoverTarget) > 0.001);
 
         if (item.mode !== 'snake') {
           row.style.scale = '';
