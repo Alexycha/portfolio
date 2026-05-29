@@ -49,6 +49,10 @@
     galleryEase: 0.055,
     galleryDragSpeed: 1.25,
     galleryWheelSpeed: 0.85,
+    mobileSnakeGalleryEase: 0.11,
+    mobileSnakeDragSpeed: 1.72,
+    mobileSnakeWheelSpeed: 1.18,
+    mobileSnakeReleaseMomentum: 3.8,
     horizontalGalleryEase: 0.036,
     mobileHorizontalGalleryEase: 0.068,
     horizontalDragSpeed: 0.72,
@@ -162,6 +166,10 @@
   const getHorizontalEase = viewport => (viewport.isMobile ? CONFIG.mobileHorizontalGalleryEase : CONFIG.horizontalGalleryEase);
   const getHorizontalDragSpeed = viewport => (viewport.isMobile ? CONFIG.mobileHorizontalDragSpeed : CONFIG.horizontalDragSpeed);
   const getHorizontalWheelSpeed = viewport => (viewport.isMobile ? CONFIG.mobileHorizontalWheelSpeed : CONFIG.horizontalWheelSpeed);
+  const getSnakeEase = viewport => (viewport.isMobile ? CONFIG.mobileSnakeGalleryEase : CONFIG.galleryEase);
+  const getSnakeDragSpeed = viewport => (viewport.isMobile ? CONFIG.mobileSnakeDragSpeed : CONFIG.galleryDragSpeed);
+  const getSnakeWheelSpeed = viewport => (viewport.isMobile ? CONFIG.mobileSnakeWheelSpeed : CONFIG.galleryWheelSpeed);
+  const canHover = () => window.matchMedia?.('(hover: hover) and (pointer: fine)')?.matches || false;
   const shouldIgnoreProjectOpen = target => {
     if (!(target instanceof Element)) return true;
     if (target.closest(`${SELECTORS.projectModal}, .mini-modal, .site-header`)) return true;
@@ -510,7 +518,7 @@
       this.snakeIntensityTarget = 0;
       this.lastRenderAt = performance.now();
       this.resizeFrame = 0;
-      this.drag = { start: 0, down: false, moved: false, suppressClickUntil: 0 };
+      this.drag = { start: 0, down: false, moved: false, suppressClickUntil: 0, lastDelta: 0 };
       this.boundRows = new WeakSet();
       this.hoverTargets = new WeakMap();
       this.hoverValues = new WeakMap();
@@ -585,6 +593,7 @@
     bindRowHover(row) {
       if (this.boundRows.has(row)) return;
       this.boundRows.add(row);
+      if (!canHover()) return;
 
       row.addEventListener('pointerenter', () => {
         this.hoverTargets.set(row, 1);
@@ -613,7 +622,7 @@
       window.addEventListener('wheel', event => {
         if (isLocked()) return;
         const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
-        const speed = isSnakeView() ? CONFIG.galleryWheelSpeed : getHorizontalWheelSpeed(this.viewport);
+        const speed = isSnakeView() ? getSnakeWheelSpeed(this.viewport) : getHorizontalWheelSpeed(this.viewport);
         const movement = delta * speed;
         this.target += movement;
         this.pushVelocityImpulse(movement);
@@ -648,6 +657,7 @@
       if (isLocked()) return;
       this.drag.down = true;
       this.drag.moved = false;
+      this.drag.lastDelta = 0;
       this.drag.start = getEventAxis(event);
     }
 
@@ -655,10 +665,11 @@
       if (!this.drag.down) return;
 
       const current = getEventAxis(event);
-      const speed = isSnakeView() ? CONFIG.galleryDragSpeed : getHorizontalDragSpeed(this.viewport);
+      const speed = isSnakeView() ? getSnakeDragSpeed(this.viewport) : getHorizontalDragSpeed(this.viewport);
       const delta = (this.drag.start - current) * speed;
 
       this.drag.start = current;
+      this.drag.lastDelta = delta;
       if (Math.abs(delta) > 1) {
         this.drag.moved = true;
         this.drag.suppressClickUntil = performance.now() + CONFIG.dragClickSuppressMs;
@@ -671,6 +682,9 @@
     pointerUp() {
       if (this.drag.moved) {
         this.drag.suppressClickUntil = performance.now() + CONFIG.dragClickSuppressMs;
+      }
+      if (this.drag.moved && isSnakeView() && this.viewport.isMobile) {
+        this.target += this.drag.lastDelta * CONFIG.mobileSnakeReleaseMomentum;
       }
       this.drag.down = false;
       this.wake();
@@ -722,7 +736,7 @@
         return;
       }
 
-      const ease = isSnakeView() ? CONFIG.galleryEase : getHorizontalEase(this.viewport);
+      const ease = isSnakeView() ? getSnakeEase(this.viewport) : getHorizontalEase(this.viewport);
       const delta = this.target - this.current;
       const previous = this.current;
 
@@ -1094,6 +1108,7 @@
           gsap.set([wrapper, title, ...titleChars, ...topItems, ...controls, ...bottomItems], {
             clearProps: 'opacity,visibility,transform,clipPath,perspective,filter',
           });
+          gsap.set(titleChars, { clearProps: 'opacity,visibility,transform,filter,transformOrigin' });
           gsap.set(frames, { clearProps: 'opacity,visibility,transform,clipPath,backgroundColor,transformOrigin' });
           gsap.set(mediaEls, { clearProps: 'transform,filter' });
           gsap.set(labels, { clearProps: 'opacity,visibility,filter,clipPath' });
