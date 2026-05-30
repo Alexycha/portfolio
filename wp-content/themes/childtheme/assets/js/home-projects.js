@@ -9,6 +9,7 @@
     rowIntroLabel: '.project-row__header, .tag-home-wrap',
     rowMedia: '.project-row__media-el, .media-slider-home',
     videoMedia: 'video.project-row__media-el, video.media-slider-home',
+    snakeZoomControl: '[data-snake-zoom-control]',
     projectModal: '#pmodal',
     pmodalOverlay: '.pmodal__overlay',
     pmodalShell: '.pmodal__shell',
@@ -26,6 +27,7 @@
     pmodalBlock: '.pmodal__block',
     pmodalThumb: '.pmodal__thumb',
     pmodalFeatured: '.pmodal__featured',
+    snakeZoom: '[data-snake-zoom]',
     headerTop: '.site-header__top',
     headerRole: '.site-header__role',
     headerNavItem: '.site-header__nav .site-header__link',
@@ -46,13 +48,13 @@
   };
 
   const CONFIG = {
-    galleryEase: 0.055,
-    galleryDragSpeed: 1.25,
-    galleryWheelSpeed: 0.85,
-    mobileSnakeGalleryEase: 0.11,
-    mobileSnakeDragSpeed: 1.72,
-    mobileSnakeWheelSpeed: 1.18,
-    mobileSnakeReleaseMomentum: 3.8,
+    galleryEase: 0.082,
+    galleryDragSpeed: 2.45,
+    galleryWheelSpeed: 2.55,
+    mobileSnakeGalleryEase: 0.2,
+    mobileSnakeDragSpeed: 3.7,
+    mobileSnakeWheelSpeed: 3.15,
+    mobileSnakeReleaseMomentum: 8.2,
     horizontalGalleryEase: 0.036,
     mobileHorizontalGalleryEase: 0.068,
     horizontalDragSpeed: 0.72,
@@ -64,8 +66,8 @@
     videoMargin: 260,
     videoUpdateInterval: 250,
     dragClickSuppressMs: 260,
-    leadingCloneSets: 2,
-    trailingCloneSets: 4,
+    leadingCloneSets: 3,
+    trailingCloneSets: 8,
     classicOverlap: 2.25,
     classicRevealDistanceVh: 34,
     mobileClassicRevealDistanceVh: 50,
@@ -85,6 +87,7 @@
     snakePitchRatio: 0.42,
     snakeViewportShift: 0.04,
     mobileSnakeViewportShift: 0,
+    snakeZoomEase: 0.12,
     projectTransitionStagger: 0.24,
     projectExitDuration: 0.64,
     projectReturnDuration: 0.66,
@@ -170,6 +173,23 @@
   const getSnakeDragSpeed = viewport => (viewport.isMobile ? CONFIG.mobileSnakeDragSpeed : CONFIG.galleryDragSpeed);
   const getSnakeWheelSpeed = viewport => (viewport.isMobile ? CONFIG.mobileSnakeWheelSpeed : CONFIG.galleryWheelSpeed);
   const canHover = () => window.matchMedia?.('(hover: hover) and (pointer: fine)')?.matches || false;
+  const getSnakeZoomProfile = zoom => {
+    const zoomOut = clamp(0, 1, -zoom);
+    const zoomIn = clamp(0, 1, zoom);
+
+    return {
+      itemScale: 1 - (zoomOut * 0.62) + (zoomIn * 0.34),
+      pitchScale: 1 - (zoomOut * 0.9) + (zoomIn * 0.28),
+      arcScale: 1 - (zoomOut * 0.99) + (zoomIn * 0.82),
+      diagonalScale: 1 - zoomOut + (zoomIn * 0.18),
+      depthScale: 1 - (zoomOut * 0.92) + (zoomIn * 0.44),
+      rotateScale: 1 + (zoomOut * 0.72) + (zoomIn * 0.22),
+      sideLean: zoomOut,
+      straightness: zoomOut,
+      zOffset: -(zoomOut * 92) + (zoomIn * 26),
+      yLimitScale: 1 - (zoomOut * 0.16) + (zoomIn * 0.28),
+    };
+  };
   const shouldIgnoreProjectOpen = target => {
     if (!(target instanceof Element)) return true;
     if (target.closest(`${SELECTORS.projectModal}, .mini-modal, .site-header`)) return true;
@@ -270,21 +290,23 @@
     if (media?.tagName === 'VIDEO') media.pause();
   };
 
-  const getSnakePose = (rowCenter, viewport = getViewportState(), intensity = 0) => {
+  const getSnakePose = (rowCenter, viewport = getViewportState(), intensity = 0, zoom = 0) => {
     const { width, center, height, isMobile, isTablet } = viewport;
     const isWide = width >= 1600;
     const isUltraWide = width >= 2200;
+    const zoomProfile = getSnakeZoomProfile(zoom);
+    const stackMotion = Math.max(0, 1 - (zoomProfile.straightness * 1.12));
     const calmBase = isMobile
       ? Math.min(72, height * 0.085)
       : (isTablet ? Math.min(112, height * 0.12) : Math.min(148, height * 0.145));
-    const speedShape = 1 + (intensity * (isMobile ? 0.12 : 0.16));
+    const speedShape = 1 + (intensity * (isMobile ? 0.12 : 0.16) * stackMotion);
     const yAmp = calmBase * speedShape;
     const diagonalRise = (isMobile
       ? Math.min(82, height * 0.095)
       : (isTablet ? Math.min(130, height * 0.135) : Math.min(178, height * 0.17))) *
-      (1 + (intensity * (isMobile ? 0.08 : 0.1)));
-    const zBase = (isMobile ? -14 : (isTablet ? -20 : -24)) - (intensity * (isMobile ? 4 : 8));
-    const zAmp = (isMobile ? 24 : (isTablet ? 30 : 36)) * (1 + (intensity * 0.45));
+      (1 + (intensity * (isMobile ? 0.08 : 0.1) * stackMotion));
+    const zBase = (isMobile ? -14 : (isTablet ? -20 : -24)) - (intensity * (isMobile ? 4 : 8) * stackMotion);
+    const zAmp = (isMobile ? 24 : (isTablet ? 30 : 36)) * (1 + (intensity * 0.45 * stackMotion));
     const leftness = clamp(0, 1, 1 - (rowCenter / width));
     const depthBias = Math.pow(leftness, 1.18);
     const progress = clamp(-1.65, 1.65, (rowCenter - center) / center);
@@ -295,43 +317,64 @@
     const broadWave = Math.sin(broadWavePhase);
     const secondaryWave = Math.sin(secondaryWavePhase) * (isMobile ? 0.12 : 0.16);
     const directionBias = clamp(-1, 1, progress);
-    const diagonalY = -directionBias * diagonalRise;
-    const arcY = -(broadWave + secondaryWave) * yAmp;
+    const diagonalY = -directionBias * diagonalRise * zoomProfile.diagonalScale;
+    const arcY = -(broadWave + secondaryWave) * yAmp * zoomProfile.arcScale * stackMotion;
     const broadWaveDerivative = Math.cos(broadWavePhase) * Math.PI * broadWaveFrequency;
     const secondaryWaveDerivative = Math.cos(secondaryWavePhase) * Math.PI * 1.12 * (isMobile ? 0.12 : 0.16);
     const dyPerProgress = -diagonalRise - ((broadWaveDerivative + secondaryWaveDerivative) * yAmp);
     const tangentAngle = Math.atan2(dyPerProgress, center) * (180 / Math.PI);
-    const sideTurnProgress = Math.pow(clamp(0, 1, (leftness - 0.18) / 0.82), 1.75);
+    const sideTurnProgress = Math.pow(clamp(0, 1, (leftness - 0.18) / 0.82), 1.75) * stackMotion;
     const sideTurnMax = isMobile ? 26 : (isTablet ? 31 : (isUltraWide ? 17 : (isWide ? 22 : 34)));
-    const sideTurn = sideTurnProgress * sideTurnMax;
+    const sideTurn = sideTurnProgress * sideTurnMax * zoomProfile.rotateScale;
     const baseRotateY = isMobile ? -13 : (isTablet ? -15 : (isUltraWide ? -10 : (isWide ? -12 : -16)));
     const minRotateY = isMobile ? -38 : (isTablet ? -45 : (isUltraWide ? -28 : (isWide ? -34 : -49)));
-    const rotateY = clamp(
-      minRotateY,
-      isMobile ? -11 : -13,
-      baseRotateY - sideTurn + (directionBias * (isMobile ? 0.8 : 1.15))
+    const sideLean = zoomProfile.sideLean * (isMobile ? -30 : (isTablet ? -36 : -42));
+    const rawMinRotateY = minRotateY - (zoomProfile.sideLean * (isMobile ? 16 : (isTablet ? 22 : 28)));
+    const rawMaxRotateY = (isMobile ? -11 : -13) - (zoomProfile.sideLean * (isMobile ? 30 : (isTablet ? 38 : 46)));
+    const minRotateYZoomed = Math.min(rawMinRotateY, rawMaxRotateY);
+    const maxRotateYZoomed = Math.max(rawMinRotateY, rawMaxRotateY);
+    const curvedRotateY = clamp(
+      minRotateYZoomed,
+      maxRotateYZoomed,
+      baseRotateY - sideTurn + sideLean + (directionBias * (isMobile ? 0.8 : 1.15))
     );
+    const stackedRotateX = isMobile ? -22 : (isTablet ? -24 : -26);
+    const rotateX = stackedRotateX * zoomProfile.straightness;
+    const stackedRotateY = isMobile ? -13 : (isTablet ? -14 : (isUltraWide ? -14 : -15));
+    const rotateY = curvedRotateY + ((stackedRotateY - curvedRotateY) * zoomProfile.straightness);
     const yLimit = Math.max(
       isMobile ? 92 : 128,
-      (height * (isMobile ? 0.34 : 0.38)) - (isMobile ? 58 : 84)
+      ((height * (isMobile ? 0.34 : 0.38)) - (isMobile ? 58 : 84)) * zoomProfile.yLimitScale
     );
     const containedY = clamp(-yLimit, yLimit, diagonalY + arcY);
     const rotateZ = clamp(
       isMobile ? -2.8 : -3.6,
       isMobile ? 2.6 : 3.2,
-      (tangentAngle * (isMobile ? 0.13 : 0.16)) -
+      (tangentAngle * (isMobile ? 0.13 : 0.16) * zoomProfile.rotateScale * stackMotion) -
         (isMobile ? 0.2 : 0.35) +
-        (Math.sin(progress * Math.PI) * intensity * (isMobile ? 0.12 : 0.18))
+        (Math.sin(progress * Math.PI) * intensity * (isMobile ? 0.12 : 0.18) * stackMotion)
     );
+    const stackedRotateZ = 0;
+    const finalRotateZ = rotateZ + ((stackedRotateZ - rotateZ) * zoomProfile.straightness);
+    const curvedZ = zBase + zoomProfile.zOffset - ((abs * zAmp) * zoomProfile.depthScale) - (depthBias * (isMobile ? 8 : (isWide ? 10 : 18)) * zoomProfile.depthScale);
+    const stackedZ = isMobile ? -86 : (isTablet ? -102 : -118);
+    const finalZ = curvedZ + ((stackedZ - curvedZ) * zoomProfile.straightness);
+    const curvedScale = (1 - (Math.min(abs, 1.45) * 0.01 * (1 + (intensity * 0.18 * stackMotion)))) * zoomProfile.itemScale;
+    const finalScale = curvedScale + ((zoomProfile.itemScale - curvedScale) * zoomProfile.straightness);
+    const scaleY = 1;
+    const curvedOpacity = 1 - (Math.min(abs, 1.65) * 0.032 * (1 + (intensity * 0.16 * stackMotion)));
+    const finalOpacity = curvedOpacity + ((1 - curvedOpacity) * zoomProfile.straightness);
 
     return {
       progress,
       y: containedY,
-      z: zBase - (abs * zAmp) - (depthBias * (isMobile ? 8 : (isWide ? 10 : 18))),
+      z: finalZ,
+      rotateX,
       rotateY,
-      rotateZ,
-      scale: 1 - (Math.min(abs, 1.45) * 0.01 * (1 + (intensity * 0.18))),
-      opacity: 1 - (Math.min(abs, 1.65) * 0.032 * (1 + (intensity * 0.16))),
+      rotateZ: finalRotateZ,
+      scale: finalScale,
+      scaleY,
+      opacity: finalOpacity,
     };
   };
 
@@ -516,6 +559,9 @@
       this.inputVelocity = 0;
       this.snakeIntensity = 0;
       this.snakeIntensityTarget = 0;
+      this.snakeZoom = 0;
+      this.snakeZoomTarget = 0;
+      this.zoomRange = qs(SELECTORS.snakeZoom);
       this.lastRenderAt = performance.now();
       this.resizeFrame = 0;
       this.drag = { start: 0, down: false, moved: false, suppressClickUntil: 0, lastDelta: 0 };
@@ -531,7 +577,24 @@
       this.cacheItems();
       this.calcDimensions();
       this.bindInput();
+      this.bindZoomControl();
       this.wake();
+    }
+
+    bindZoomControl() {
+      if (!this.zoomRange) return;
+
+      const syncZoom = () => {
+        const rawValue = Number.parseFloat(this.zoomRange.value);
+        const value = Number.isFinite(rawValue) ? clamp(0, 100, rawValue) : 50;
+        this.snakeZoomTarget = (value - 50) / 50;
+        this.zoomRange.style.setProperty('--snake-zoom-progress', `${value}%`);
+        this.wake();
+      };
+
+      this.zoomRange.addEventListener('input', syncZoom);
+      this.zoomRange.addEventListener('change', syncZoom);
+      syncZoom();
     }
 
     cloneRows() {
@@ -622,7 +685,9 @@
       window.addEventListener('wheel', event => {
         if (isLocked()) return;
         const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
-        const speed = isSnakeView() ? getSnakeWheelSpeed(this.viewport) : getHorizontalWheelSpeed(this.viewport);
+        const speed = isSnakeView()
+          ? getSnakeWheelSpeed(this.viewport) * this.getSnakeInputMultiplier()
+          : getHorizontalWheelSpeed(this.viewport);
         const movement = delta * speed;
         this.target += movement;
         this.pushVelocityImpulse(movement);
@@ -665,7 +730,9 @@
       if (!this.drag.down) return;
 
       const current = getEventAxis(event);
-      const speed = isSnakeView() ? getSnakeDragSpeed(this.viewport) : getHorizontalDragSpeed(this.viewport);
+      const speed = isSnakeView()
+        ? getSnakeDragSpeed(this.viewport) * this.getSnakeInputMultiplier()
+        : getHorizontalDragSpeed(this.viewport);
       const delta = (this.drag.start - current) * speed;
 
       this.drag.start = current;
@@ -684,7 +751,7 @@
         this.drag.suppressClickUntil = performance.now() + CONFIG.dragClickSuppressMs;
       }
       if (this.drag.moved && isSnakeView() && this.viewport.isMobile) {
-        this.target += this.drag.lastDelta * CONFIG.mobileSnakeReleaseMomentum;
+        this.target += this.drag.lastDelta * CONFIG.mobileSnakeReleaseMomentum * this.getSnakeInputMultiplier();
       }
       this.drag.down = false;
       this.wake();
@@ -730,13 +797,30 @@
       this.leadingWidth = this.singleSetWidth * CONFIG.leadingCloneSets;
     }
 
+    getSnakeZoomOut() {
+      return clamp(0, 1, -this.snakeZoomTarget);
+    }
+
+    getSnakeInputMultiplier() {
+      const zoomOut = this.getSnakeZoomOut();
+      return 1 + (zoomOut * (this.viewport.isMobile ? 3.2 : 3.8));
+    }
+
+    getSnakeEaseMultiplier() {
+      const zoomOut = this.getSnakeZoomOut();
+      return 1 + (zoomOut * (this.viewport.isMobile ? 1.1 : 1.45));
+    }
+
     render() {
       if (this.paused || !this.singleSetWidth) {
         this.sleep();
         return;
       }
 
-      const ease = isSnakeView() ? getSnakeEase(this.viewport) : getHorizontalEase(this.viewport);
+      const snake = isSnakeView();
+      const ease = snake
+        ? Math.min(this.viewport.isMobile ? 0.42 : 0.32, getSnakeEase(this.viewport) * this.getSnakeEaseMultiplier())
+        : getHorizontalEase(this.viewport);
       const delta = this.target - this.current;
       const previous = this.current;
 
@@ -749,6 +833,10 @@
       const now = performance.now();
       const elapsed = Math.min(80, Math.max(16, now - this.lastRenderAt));
       this.lastRenderAt = now;
+      this.snakeZoom += (this.snakeZoomTarget - this.snakeZoom) * CONFIG.snakeZoomEase;
+      if (Math.abs(this.snakeZoomTarget - this.snakeZoom) < 0.001) {
+        this.snakeZoom = this.snakeZoomTarget;
+      }
 
       const motion = Math.abs(this.current - previous);
       const velocityDecay = Math.pow(CONFIG.snakeVelocityDecay, elapsed / 16.67);
@@ -769,7 +857,6 @@
         this.snakeIntensity = this.snakeIntensityTarget;
       }
 
-      const snake = isSnakeView();
       const settled = !this.drag.down && Math.abs(this.target - this.current) <= 0.01;
 
       if (!snake && settled && !this.needsLayout) {
@@ -809,7 +896,7 @@
     }
 
     renderSnakeGallery() {
-      let keepRendering = true;
+      let keepRendering = false;
       const now = performance.now();
       const idleStrength = 1 - clamp(0, 1, this.snakeIntensity / CONFIG.snakeSpeedMaxIntensity);
       const idleWaveTime = now * CONFIG.snakeIdleWaveSpeed;
@@ -817,29 +904,34 @@
       const unitOffset = progress * this.originalCount;
       const speedDirection = clamp(-1, 1, this.scrollDirection / (this.viewport.isMobile ? 12 : 18));
       const speedMass = clamp(0, 1, this.snakeIntensity / CONFIG.snakeSpeedMaxIntensity);
+      const zoomProfile = getSnakeZoomProfile(this.snakeZoom);
+      const stackMotion = Math.max(0, 1 - (zoomProfile.straightness * 1.12));
+      keepRendering = stackMotion > 0.001 || Math.abs(this.snakeZoomTarget - this.snakeZoom) > 0.001;
+      const stackInset = this.viewport.width * (this.viewport.isMobile ? 0.23 : (this.viewport.isTablet ? 0.26 : 0.3)) * zoomProfile.straightness;
 
       this.items.forEach(item => {
         const { row } = item;
-        const pitch = Math.max(
+        const basePitch = Math.max(
           item.width * CONFIG.snakePitchRatio,
           this.viewport.isMobile ? 72 : (this.viewport.isTablet ? 96 : 118)
         );
+        const pitch = Math.max(basePitch * zoomProfile.pitchScale, basePitch * 0.1);
         const sequenceIndex = item.index - this.snakeOriginIndex - unitOffset;
         const viewportShift = this.viewport.isMobile ? CONFIG.mobileSnakeViewportShift : CONFIG.snakeViewportShift;
-        const visualCenter = (sequenceIndex * pitch) + (pitch * 0.35) - (this.viewport.width * viewportShift);
+        const visualCenter = (sequenceIndex * pitch) + (pitch * 0.35) - (this.viewport.width * viewportShift) + stackInset;
         const offsetX = visualCenter - item.left - (item.width / 2);
-        const pose = getSnakePose(visualCenter, this.viewport, this.snakeIntensity);
+        const pose = getSnakePose(visualCenter, this.viewport, this.snakeIntensity, this.snakeZoom);
         const hoverTarget = this.hoverTargets.get(row) || 0;
         const hoverCurrent = this.hoverValues.get(row) || 0;
         const hover = hoverCurrent + ((hoverTarget - hoverCurrent) * 0.14);
-        const hoverLift = -46 * hover;
+        const hoverLift = -46 * hover * stackMotion;
         const idleWave = Math.sin(idleWaveTime + (item.index * CONFIG.snakeIdleWavePhase)) *
           CONFIG.snakeIdleWaveAmplitude *
-          idleStrength;
-        const inertiaX = speedDirection * speedMass * (this.viewport.isMobile ? 7 : 12);
-        const inertiaSkew = speedDirection * speedMass * (this.viewport.isMobile ? 0.85 : 1.45);
-        const inertiaRotate = speedDirection * speedMass * (this.viewport.isMobile ? 0.42 : 0.78);
-
+          idleStrength *
+          stackMotion;
+        const inertiaX = speedDirection * speedMass * (this.viewport.isMobile ? 7 : 12) * stackMotion;
+        const inertiaSkew = speedDirection * speedMass * (this.viewport.isMobile ? 0.85 : 1.45) * stackMotion;
+        const inertiaRotate = speedDirection * speedMass * (this.viewport.isMobile ? 0.42 : 0.78) * stackMotion;
         this.hoverValues.set(row, hover);
         keepRendering = keepRendering || Math.abs(hover - hoverTarget) > 0.001;
 
@@ -864,7 +956,7 @@
         const sourceLift = row.classList.contains(CLASSES.transitionSource) ? 600 : 0;
         row.style.zIndex = String(getSnakeZIndex(pose) + sourceLift);
         row.style.opacity = `calc(${pose.opacity} * var(--modal-opacity, 1))`;
-        row.style.transform = `translate3d(${offsetX + inertiaX}px, calc(${pose.y + hoverLift + idleWave}px + var(--modal-y, 0px)), ${pose.z}px) rotateY(${pose.rotateY}deg) rotateZ(${pose.rotateZ + inertiaRotate}deg) skewY(${inertiaSkew}deg) scale(${pose.scale})`;
+        row.style.transform = `translate3d(${offsetX + inertiaX}px, calc(${pose.y + hoverLift + idleWave}px + var(--modal-y, 0px)), ${pose.z}px) rotateX(${pose.rotateX}deg) rotateY(${pose.rotateY}deg) rotateZ(${pose.rotateZ + inertiaRotate}deg) skewY(${inertiaSkew}deg) scale3d(${pose.scale}, ${pose.scale * pose.scaleY}, 1)`;
 
         this.setActive(item, Math.abs(this.viewport.center - visualCenter) < CONFIG.activeGalleryDistance);
       });
@@ -1042,6 +1134,7 @@
     play() {
       const wrapper = this.scrollView.wrapper;
       const title = qs(SELECTORS.homeTitle);
+      const zoomControl = qs(SELECTORS.snakeZoomControl);
       const titleChars = this.splitTitle(title);
       const topItems = [
         qs(SELECTORS.headerRole),
@@ -1065,10 +1158,22 @@
       this.scrollView.wake();
       document.body.classList.add(CLASSES.homeIntroRunning);
 
-      gsap.killTweensOf([wrapper, title, ...titleChars, ...topItems, ...controls, ...bottomItems, ...frames, ...mediaEls, ...labels]);
+      const introTargets = [wrapper, title, ...titleChars, ...topItems, ...controls, ...bottomItems, ...frames, ...mediaEls, ...labels];
+      if (zoomControl) introTargets.push(zoomControl);
+
+      gsap.killTweensOf(introTargets);
       gsap.set(topItems, { autoAlpha: 0, x: -18, clipPath: 'inset(0% 100% 0% 0%)' });
       gsap.set(controls, { autoAlpha: 0, y: -18, scale: 0.94 });
       gsap.set(bottomItems, { autoAlpha: 0, y: 24, clipPath: 'inset(100% 0% 0% 0%)' });
+      if (zoomControl) {
+        gsap.set(zoomControl, {
+          autoAlpha: 0,
+          y: 14,
+          scaleX: 0.96,
+          scaleY: 0.9,
+          transformOrigin: '50% 50%',
+        });
+      }
       gsap.set(title, { autoAlpha: 1, perspective: 900 });
       gsap.set(titleChars, {
         autoAlpha: 0,
@@ -1108,6 +1213,9 @@
           gsap.set([wrapper, title, ...titleChars, ...topItems, ...controls, ...bottomItems], {
             clearProps: 'opacity,visibility,transform,clipPath,perspective,filter',
           });
+          if (zoomControl) {
+            gsap.set(zoomControl, { clearProps: 'opacity,visibility,transform,transformOrigin' });
+          }
           gsap.set(titleChars, { clearProps: 'opacity,visibility,transform,filter,transformOrigin' });
           gsap.set(frames, { clearProps: 'opacity,visibility,transform,clipPath,backgroundColor,transformOrigin' });
           gsap.set(mediaEls, { clearProps: 'transform,filter' });
@@ -1149,6 +1257,17 @@
           stagger: 0.06,
           ease: 'power3.out',
         }, footerStart);
+
+      if (zoomControl) {
+        this.timeline.to(zoomControl, {
+          autoAlpha: 1,
+          y: 0,
+          scaleX: 1,
+          scaleY: 1,
+          duration: 0.62,
+          ease: 'power3.out',
+        }, 0.2);
+      }
 
       introFrames.forEach((item, index) => {
         const offset = itemStart + (index * itemDelay) + ((index % 3) * 0.012);
