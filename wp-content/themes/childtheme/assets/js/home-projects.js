@@ -48,13 +48,13 @@
   };
 
   const CONFIG = {
-    galleryEase: 0.082,
-    galleryDragSpeed: 2.45,
-    galleryWheelSpeed: 2.55,
-    mobileSnakeGalleryEase: 0.2,
-    mobileSnakeDragSpeed: 3.7,
-    mobileSnakeWheelSpeed: 3.15,
-    mobileSnakeReleaseMomentum: 8.2,
+    galleryEase: 0.075,
+    galleryDragSpeed: 1.05,
+    galleryWheelSpeed: 0.9,
+    mobileSnakeGalleryEase: 0.12,
+    mobileSnakeDragSpeed: 1.15,
+    mobileSnakeWheelSpeed: 1.25,
+    mobileSnakeReleaseMomentum: 5,
     horizontalGalleryEase: 0.036,
     mobileHorizontalGalleryEase: 0.068,
     horizontalDragSpeed: 0.72,
@@ -75,16 +75,14 @@
     mobileClassicStartHeightRatio: 0.42,
     mobileClassicMaxScale: 1.84,
     mobileClassicMaxHeightRatio: 0.72,
-    snakeIdleWaveAmplitude: 5,
-    snakeIdleWaveSpeed: 0.0011,
-    snakeIdleWavePhase: 0.36,
     snakeSpeedReference: 16,
     snakeSpeedMaxIntensity: 1,
     snakeAccelEase: 0.105,
     snakeDecelEase: 0.045,
     snakeVelocityDecay: 0.87,
     snakeVelocityImpulse: 0.08,
-    snakePitchRatio: 0.42,
+    snakePitchRatio: 0.43,
+    mobileSnakePitchRatio: 0.46,
     snakeViewportShift: 0.04,
     mobileSnakeViewportShift: 0,
     snakeZoomEase: 0.12,
@@ -178,16 +176,14 @@
     const zoomIn = clamp(0, 1, zoom);
 
     return {
-      itemScale: 1 - (zoomOut * 0.62) + (zoomIn * 0.34),
-      pitchScale: 1 - (zoomOut * 0.9) + (zoomIn * 0.28),
-      arcScale: 1 - (zoomOut * 0.99) + (zoomIn * 0.82),
-      diagonalScale: 1 - zoomOut + (zoomIn * 0.18),
-      depthScale: 1 - (zoomOut * 0.92) + (zoomIn * 0.44),
-      rotateScale: 1 + (zoomOut * 0.72) + (zoomIn * 0.22),
-      sideLean: zoomOut,
-      straightness: zoomOut,
-      zOffset: -(zoomOut * 92) + (zoomIn * 26),
-      yLimitScale: 1 - (zoomOut * 0.16) + (zoomIn * 0.28),
+      itemScale: 1 - (zoomOut * 0.3) + (zoomIn * 0.2),
+      pitchScale: 1 - (zoomOut * 0.3) + (zoomIn * 0.2),
+      arcScale: 1 - (zoomOut * 0.15) + (zoomIn * 0.12),
+      diagonalScale: 1 - (zoomOut * 0.12) + (zoomIn * 0.1),
+      depthScale: 1 - (zoomOut * 0.2) + (zoomIn * 0.18),
+      rotateScale: 1,
+      zOffset: -(zoomOut * 28) + (zoomIn * 18),
+      yLimitScale: 1 - (zoomOut * 0.08) + (zoomIn * 0.12),
     };
   };
   const shouldIgnoreProjectOpen = target => {
@@ -291,94 +287,51 @@
   };
 
   const getSnakePose = (rowCenter, viewport = getViewportState(), intensity = 0, zoom = 0) => {
-    const { width, center, height, isMobile, isTablet } = viewport;
-    const isWide = width >= 1600;
-    const isUltraWide = width >= 2200;
+    const { center, height, isMobile, isTablet } = viewport;
     const zoomProfile = getSnakeZoomProfile(zoom);
-    const stackMotion = Math.max(0, 1 - (zoomProfile.straightness * 1.12));
-    const calmBase = isMobile
-      ? Math.min(72, height * 0.085)
-      : (isTablet ? Math.min(112, height * 0.12) : Math.min(148, height * 0.145));
-    const speedShape = 1 + (intensity * (isMobile ? 0.12 : 0.16) * stackMotion);
-    const yAmp = calmBase * speedShape;
+    const progress = clamp(-1.75, 1.75, (rowCenter - center) / center);
+    const speedShape = 1 + (intensity * (isMobile ? 0.06 : 0.08));
     const diagonalRise = (isMobile
-      ? Math.min(82, height * 0.095)
-      : (isTablet ? Math.min(130, height * 0.135) : Math.min(178, height * 0.17))) *
-      (1 + (intensity * (isMobile ? 0.08 : 0.1) * stackMotion));
-    const zBase = (isMobile ? -14 : (isTablet ? -20 : -24)) - (intensity * (isMobile ? 4 : 8) * stackMotion);
-    const zAmp = (isMobile ? 24 : (isTablet ? 30 : 36)) * (1 + (intensity * 0.45 * stackMotion));
-    const leftness = clamp(0, 1, 1 - (rowCenter / width));
-    const depthBias = Math.pow(leftness, 1.18);
-    const progress = clamp(-1.65, 1.65, (rowCenter - center) / center);
-    const abs = Math.abs(progress);
-    const broadWaveFrequency = isMobile ? 0.66 : 0.74;
-    const broadWavePhase = progress * Math.PI * broadWaveFrequency - 0.42;
-    const secondaryWavePhase = progress * Math.PI * 1.12 + 0.72;
-    const broadWave = Math.sin(broadWavePhase);
-    const secondaryWave = Math.sin(secondaryWavePhase) * (isMobile ? 0.12 : 0.16);
-    const directionBias = clamp(-1, 1, progress);
-    const diagonalY = -directionBias * diagonalRise * zoomProfile.diagonalScale;
-    const arcY = -(broadWave + secondaryWave) * yAmp * zoomProfile.arcScale * stackMotion;
-    const broadWaveDerivative = Math.cos(broadWavePhase) * Math.PI * broadWaveFrequency;
-    const secondaryWaveDerivative = Math.cos(secondaryWavePhase) * Math.PI * 1.12 * (isMobile ? 0.12 : 0.16);
-    const dyPerProgress = -diagonalRise - ((broadWaveDerivative + secondaryWaveDerivative) * yAmp);
-    const tangentAngle = Math.atan2(dyPerProgress, center) * (180 / Math.PI);
-    const sideTurnProgress = Math.pow(clamp(0, 1, (leftness - 0.18) / 0.82), 1.75) * stackMotion;
-    const sideTurnMax = isMobile ? 26 : (isTablet ? 31 : (isUltraWide ? 17 : (isWide ? 22 : 34)));
-    const sideTurn = sideTurnProgress * sideTurnMax * zoomProfile.rotateScale;
-    const baseRotateY = isMobile ? -13 : (isTablet ? -15 : (isUltraWide ? -10 : (isWide ? -12 : -16)));
-    const minRotateY = isMobile ? -38 : (isTablet ? -45 : (isUltraWide ? -28 : (isWide ? -34 : -49)));
-    const sideLean = zoomProfile.sideLean * (isMobile ? -30 : (isTablet ? -36 : -42));
-    const rawMinRotateY = minRotateY - (zoomProfile.sideLean * (isMobile ? 16 : (isTablet ? 22 : 28)));
-    const rawMaxRotateY = (isMobile ? -11 : -13) - (zoomProfile.sideLean * (isMobile ? 30 : (isTablet ? 38 : 46)));
-    const minRotateYZoomed = Math.min(rawMinRotateY, rawMaxRotateY);
-    const maxRotateYZoomed = Math.max(rawMinRotateY, rawMaxRotateY);
-    const curvedRotateY = clamp(
-      minRotateYZoomed,
-      maxRotateYZoomed,
-      baseRotateY - sideTurn + sideLean + (directionBias * (isMobile ? 0.8 : 1.15))
-    );
-    const stackedRotateX = isMobile ? -22 : (isTablet ? -24 : -26);
-    const rotateX = stackedRotateX * zoomProfile.straightness;
-    const stackedRotateY = isMobile ? -13 : (isTablet ? -14 : (isUltraWide ? -14 : -15));
-    const rotateY = curvedRotateY + ((stackedRotateY - curvedRotateY) * zoomProfile.straightness);
+      ? Math.min(92, height * 0.13)
+      : (isTablet ? Math.min(170, height * 0.2) : Math.min(240, height * 0.23))) * speedShape;
+    const waveAmplitude = (isMobile
+      ? Math.min(28, height * 0.035)
+      : (isTablet ? Math.min(46, height * 0.05) : Math.min(58, height * 0.06))) * speedShape;
+    const waveFrequency = isMobile ? 0.48 : 0.54;
+    const wavePhase = (progress * Math.PI * waveFrequency) - 0.25;
+    const diagonalY = -progress * diagonalRise * zoomProfile.diagonalScale;
+    const waveY = -Math.sin(wavePhase) * waveAmplitude * zoomProfile.arcScale;
     const yLimit = Math.max(
-      isMobile ? 92 : 128,
-      ((height * (isMobile ? 0.34 : 0.38)) - (isMobile ? 58 : 84)) * zoomProfile.yLimitScale
+      isMobile ? 108 : 150,
+      ((height * (isMobile ? 0.34 : 0.43)) - (isMobile ? 48 : 68)) * zoomProfile.yLimitScale
     );
-    const containedY = clamp(-yLimit, yLimit, diagonalY + arcY);
-    const rotateZ = clamp(
-      isMobile ? -2.8 : -3.6,
-      isMobile ? 2.6 : 3.2,
-      (tangentAngle * (isMobile ? 0.13 : 0.16) * zoomProfile.rotateScale * stackMotion) -
-        (isMobile ? 0.2 : 0.35) +
-        (Math.sin(progress * Math.PI) * intensity * (isMobile ? 0.12 : 0.18) * stackMotion)
-    );
-    const stackedRotateZ = 0;
-    const finalRotateZ = rotateZ + ((stackedRotateZ - rotateZ) * zoomProfile.straightness);
-    const curvedZ = zBase + zoomProfile.zOffset - ((abs * zAmp) * zoomProfile.depthScale) - (depthBias * (isMobile ? 8 : (isWide ? 10 : 18)) * zoomProfile.depthScale);
-    const stackedZ = isMobile ? -86 : (isTablet ? -102 : -118);
-    const finalZ = curvedZ + ((stackedZ - curvedZ) * zoomProfile.straightness);
-    const curvedScale = (1 - (Math.min(abs, 1.45) * 0.01 * (1 + (intensity * 0.18 * stackMotion)))) * zoomProfile.itemScale;
-    const finalScale = curvedScale + ((zoomProfile.itemScale - curvedScale) * zoomProfile.straightness);
-    const scaleY = 1;
-    const curvedOpacity = 1 - (Math.min(abs, 1.65) * 0.032 * (1 + (intensity * 0.16 * stackMotion)));
-    const finalOpacity = curvedOpacity + ((1 - curvedOpacity) * zoomProfile.straightness);
+    const y = clamp(-yLimit, yLimit, diagonalY + waveY);
+
+    const baseRotateY = isMobile ? -5 : (isTablet ? -6 : -7);
+    const leftTurnMax = isMobile ? 18 : (isTablet ? 23 : 28);
+    const leftTurnProgress = Math.pow(clamp(0, 1, (0.22 - progress) / 1.45), 1.28);
+    const curvedRotateY = (baseRotateY - (leftTurnProgress * leftTurnMax)) * zoomProfile.rotateScale;
+    const rotateY = curvedRotateY;
+    const rotateX = 0;
+    const rotateZ = 0;
+
+    const depthRange = isMobile ? 30 : (isTablet ? 42 : 56);
+    const z = (progress * depthRange * zoomProfile.depthScale) + zoomProfile.zOffset;
 
     return {
       progress,
-      y: containedY,
-      z: finalZ,
+      y,
+      z,
       rotateX,
       rotateY,
-      rotateZ: finalRotateZ,
-      scale: finalScale,
-      scaleY,
-      opacity: finalOpacity,
+      rotateZ,
+      scale: zoomProfile.itemScale,
+      scaleY: 1,
+      opacity: 1,
     };
   };
 
-  const getSnakeZIndex = pose => Math.round(1000 - Math.abs(pose.progress) * 90);
+  const getSnakeZIndex = sequenceIndex => Math.round(10000 + (sequenceIndex * 10));
 
   const getClassicScale = (visualLeft, visualWidth, viewport = getViewportState(), rowWidth = 0) => {
     const progress = clamp(
@@ -686,7 +639,7 @@
         if (isLocked()) return;
         const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
         const speed = isSnakeView()
-          ? getSnakeWheelSpeed(this.viewport) * this.getSnakeInputMultiplier()
+          ? getSnakeWheelSpeed(this.viewport)
           : getHorizontalWheelSpeed(this.viewport);
         const movement = delta * speed;
         this.target += movement;
@@ -731,7 +684,7 @@
 
       const current = getEventAxis(event);
       const speed = isSnakeView()
-        ? getSnakeDragSpeed(this.viewport) * this.getSnakeInputMultiplier()
+        ? getSnakeDragSpeed(this.viewport)
         : getHorizontalDragSpeed(this.viewport);
       const delta = (this.drag.start - current) * speed;
 
@@ -751,7 +704,7 @@
         this.drag.suppressClickUntil = performance.now() + CONFIG.dragClickSuppressMs;
       }
       if (this.drag.moved && isSnakeView() && this.viewport.isMobile) {
-        this.target += this.drag.lastDelta * CONFIG.mobileSnakeReleaseMomentum * this.getSnakeInputMultiplier();
+        this.target += this.drag.lastDelta * CONFIG.mobileSnakeReleaseMomentum;
       }
       this.drag.down = false;
       this.wake();
@@ -797,20 +750,6 @@
       this.leadingWidth = this.singleSetWidth * CONFIG.leadingCloneSets;
     }
 
-    getSnakeZoomOut() {
-      return clamp(0, 1, -this.snakeZoomTarget);
-    }
-
-    getSnakeInputMultiplier() {
-      const zoomOut = this.getSnakeZoomOut();
-      return 1 + (zoomOut * (this.viewport.isMobile ? 3.2 : 3.8));
-    }
-
-    getSnakeEaseMultiplier() {
-      const zoomOut = this.getSnakeZoomOut();
-      return 1 + (zoomOut * (this.viewport.isMobile ? 1.1 : 1.45));
-    }
-
     render() {
       if (this.paused || !this.singleSetWidth) {
         this.sleep();
@@ -819,7 +758,7 @@
 
       const snake = isSnakeView();
       const ease = snake
-        ? Math.min(this.viewport.isMobile ? 0.42 : 0.32, getSnakeEase(this.viewport) * this.getSnakeEaseMultiplier())
+        ? getSnakeEase(this.viewport)
         : getHorizontalEase(this.viewport);
       const delta = this.target - this.current;
       const previous = this.current;
@@ -897,41 +836,35 @@
 
     renderSnakeGallery() {
       let keepRendering = false;
-      const now = performance.now();
-      const idleStrength = 1 - clamp(0, 1, this.snakeIntensity / CONFIG.snakeSpeedMaxIntensity);
-      const idleWaveTime = now * CONFIG.snakeIdleWaveSpeed;
       const progress = wrap(0, this.singleSetWidth, this.current) / this.singleSetWidth;
       const unitOffset = progress * this.originalCount;
       const speedDirection = clamp(-1, 1, this.scrollDirection / (this.viewport.isMobile ? 12 : 18));
       const speedMass = clamp(0, 1, this.snakeIntensity / CONFIG.snakeSpeedMaxIntensity);
       const zoomProfile = getSnakeZoomProfile(this.snakeZoom);
-      const stackMotion = Math.max(0, 1 - (zoomProfile.straightness * 1.12));
-      keepRendering = stackMotion > 0.001 || Math.abs(this.snakeZoomTarget - this.snakeZoom) > 0.001;
-      const stackInset = this.viewport.width * (this.viewport.isMobile ? 0.23 : (this.viewport.isTablet ? 0.26 : 0.3)) * zoomProfile.straightness;
+      keepRendering = this.snakeIntensity > 0.01 || Math.abs(this.snakeZoomTarget - this.snakeZoom) > 0.001;
 
       this.items.forEach(item => {
         const { row } = item;
+        const pitchRatio = this.viewport.isMobile
+          ? CONFIG.mobileSnakePitchRatio
+          : CONFIG.snakePitchRatio;
         const basePitch = Math.max(
-          item.width * CONFIG.snakePitchRatio,
-          this.viewport.isMobile ? 72 : (this.viewport.isTablet ? 96 : 118)
+          item.width * pitchRatio,
+          this.viewport.isMobile ? 88 : (this.viewport.isTablet ? 112 : 126)
         );
-        const pitch = Math.max(basePitch * zoomProfile.pitchScale, basePitch * 0.1);
+        const pitch = basePitch * zoomProfile.pitchScale;
         const sequenceIndex = item.index - this.snakeOriginIndex - unitOffset;
         const viewportShift = this.viewport.isMobile ? CONFIG.mobileSnakeViewportShift : CONFIG.snakeViewportShift;
-        const visualCenter = (sequenceIndex * pitch) + (pitch * 0.35) - (this.viewport.width * viewportShift) + stackInset;
+        const visualCenter = (sequenceIndex * pitch) + (pitch * 0.35) - (this.viewport.width * viewportShift);
         const offsetX = visualCenter - item.left - (item.width / 2);
         const pose = getSnakePose(visualCenter, this.viewport, this.snakeIntensity, this.snakeZoom);
         const hoverTarget = this.hoverTargets.get(row) || 0;
         const hoverCurrent = this.hoverValues.get(row) || 0;
         const hover = hoverCurrent + ((hoverTarget - hoverCurrent) * 0.14);
-        const hoverLift = -46 * hover * stackMotion;
-        const idleWave = Math.sin(idleWaveTime + (item.index * CONFIG.snakeIdleWavePhase)) *
-          CONFIG.snakeIdleWaveAmplitude *
-          idleStrength *
-          stackMotion;
-        const inertiaX = speedDirection * speedMass * (this.viewport.isMobile ? 7 : 12) * stackMotion;
-        const inertiaSkew = speedDirection * speedMass * (this.viewport.isMobile ? 0.85 : 1.45) * stackMotion;
-        const inertiaRotate = speedDirection * speedMass * (this.viewport.isMobile ? 0.42 : 0.78) * stackMotion;
+        const hoverLift = -36 * hover;
+        const inertiaX = speedDirection * speedMass * (this.viewport.isMobile ? 5 : 8);
+        const inertiaSkew = speedDirection * speedMass * (this.viewport.isMobile ? 0.45 : 0.7);
+        const inertiaRotate = speedDirection * speedMass * (this.viewport.isMobile ? 0.22 : 0.36);
         this.hoverValues.set(row, hover);
         keepRendering = keepRendering || Math.abs(hover - hoverTarget) > 0.001;
 
@@ -953,10 +886,11 @@
           item.labelScale = 1;
         }
 
-        const sourceLift = row.classList.contains(CLASSES.transitionSource) ? 600 : 0;
-        row.style.zIndex = String(getSnakeZIndex(pose) + sourceLift);
+        const sourceLift = row.classList.contains(CLASSES.transitionSource) ? 20000 : 0;
+        row.style.zIndex = String(getSnakeZIndex(sequenceIndex) + sourceLift);
+        row.style.visibility = 'visible';
         row.style.opacity = `calc(${pose.opacity} * var(--modal-opacity, 1))`;
-        row.style.transform = `translate3d(${offsetX + inertiaX}px, calc(${pose.y + hoverLift + idleWave}px + var(--modal-y, 0px)), ${pose.z}px) rotateX(${pose.rotateX}deg) rotateY(${pose.rotateY}deg) rotateZ(${pose.rotateZ + inertiaRotate}deg) skewY(${inertiaSkew}deg) scale3d(${pose.scale}, ${pose.scale * pose.scaleY}, 1)`;
+        row.style.transform = `translate3d(${offsetX + inertiaX}px, calc(${pose.y + hoverLift}px + var(--modal-y, 0px)), ${pose.z}px) rotateX(${pose.rotateX}deg) rotateY(${pose.rotateY}deg) rotateZ(${pose.rotateZ + inertiaRotate}deg) skewY(${inertiaSkew}deg) scale3d(${pose.scale}, ${pose.scale * pose.scaleY}, 1)`;
 
         this.setActive(item, Math.abs(this.viewport.center - visualCenter) < CONFIG.activeGalleryDistance);
       });

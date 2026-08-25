@@ -465,7 +465,7 @@ body.is-snake-view .icon-list-view { display: block; }
 }
 
 body.is-snake-view .home-projects {
-  perspective: 3200px;
+  perspective: 2200px;
   perspective-origin: 50% 50%;
 }
 
@@ -554,10 +554,12 @@ body.is-project-animating .home-projects {
 
 body.is-snake-view .project-row,
 body.is-snake-view .artist_item {
-  --item-w: clamp(255px, 18vw, 390px);
+  --item-w: clamp(280px, 22vw, 440px);
+  --item-ratio: 3 / 4;
   margin-right: clamp(-196px, -9.6vw, -124px);
   margin-top: 0;
   justify-content: flex-end;
+  transform-origin: 50% 50%;
   transform-style: preserve-3d;
   backface-visibility: hidden;
   transition: filter 0.25s ease;
@@ -1314,7 +1316,7 @@ body.is-snake-view .media-slider-home {
 
   body.is-snake-view .project-row,
   body.is-snake-view .artist_item {
-    --item-w: clamp(210px, 23vw, 315px);
+    --item-w: clamp(240px, 28vw, 330px);
     margin-right: clamp(-154px, -10.8vw, -88px);
   }
 
@@ -1458,6 +1460,10 @@ body.is-snake-view .media-slider-home {
 }
 
 @media (max-width: 760px) {
+  body.is-snake-view .home-projects {
+    perspective: 1500px;
+  }
+
   :root {
     --fs-unified: 12px;
     --ls-unified: 0.028em;
@@ -1589,7 +1595,7 @@ body.is-snake-view .media-slider-home {
 
   body.is-snake-view .project-row,
   body.is-snake-view .artist_item {
-    --item-w: clamp(176px, 48vw, 260px);
+    --item-w: clamp(190px, 52vw, 270px);
     margin-right: clamp(-120px, -20vw, -64px);
   }
 
@@ -1641,7 +1647,7 @@ body.is-snake-view .media-slider-home {
 
   body.is-snake-view .project-row,
   body.is-snake-view .artist_item {
-    --item-w: clamp(158px, 47vw, 220px);
+    --item-w: clamp(176px, 50vw, 230px);
     margin-right: clamp(-96px, -17vw, -48px);
   }
 
@@ -1738,7 +1744,7 @@ body.is-snake-view .media-slider-home {
 
   body.is-snake-view .project-row,
   body.is-snake-view .artist_item {
-    --item-w: clamp(150px, 45vw, 196px);
+    --item-w: clamp(164px, 48vw, 210px);
     margin-right: clamp(-84px, -16vw, -44px);
   }
 
@@ -1767,7 +1773,7 @@ body.is-snake-view .media-slider-home {
 
   body.is-snake-view .project-row,
   body.is-snake-view .artist_item {
-    --item-w: clamp(285px, 17.5vw, 420px);
+    --item-w: clamp(300px, 21vw, 440px);
   }
 }
 
