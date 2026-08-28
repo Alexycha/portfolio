@@ -957,7 +957,7 @@
         },
       });
       const exitDuration = reduced ? 0.01 : 0.78;
-      const exitStagger = reduced ? 0 : 0.055;
+      const exitStagger = 0;
       if (activeItem) {
         const target = exitTargets.get(activeItem.media);
         tl.to(activeItem.media, {
@@ -976,12 +976,12 @@
           duration: exitDuration,
           stagger: exitStagger,
           ease: 'power3.in',
-        }, 0.04);
+        }, 0);
       }
 
       const detailStart = reduced
         ? 0.03
-        : Math.max(0.8, 0.04 + exitDuration + (Math.max(0, otherMedia.length - 1) * exitStagger) + 0.08);
+        : Math.max(0.8, exitDuration + 0.08);
       tl.to(this.els.overlay, { opacity: 1, duration: reduced ? 0.01 : 0.28, ease: 'power1.out' }, detailStart);
       tl.to(this.els.mediaCol, {
         y: 0,
