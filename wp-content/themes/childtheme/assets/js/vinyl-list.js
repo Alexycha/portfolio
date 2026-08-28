@@ -935,18 +935,31 @@
 
       document.body.classList.add('is-locked', 'is-project-transitioning');
       this.els.modal.classList.add('is-visible');
+      this.els.modal.setAttribute('aria-hidden', 'false');
 
       const reduced = prefersReducedMotion();
-      const blocks = qsa(SELECTORS.pmodalBlock, this.els.info);
+      const isMobileDetail = window.matchMedia('(max-width: 640px)').matches;
+      const blocks = qsa(SELECTORS.pmodalBlock, this.els.info).filter(block => !block.hidden);
       const detailClearance = Math.max(120, window.innerHeight * 0.1);
       const stageRect = this.els.stage.getBoundingClientRect();
       const infoRect = this.els.info.getBoundingClientRect();
       const mediaEnterY = -(stageRect.bottom + detailClearance);
       const infoEnterY = -(infoRect.bottom + detailClearance);
       gsap.set(this.els.close, { autoAlpha: 0, y: -24 });
-      gsap.set(this.els.mediaCol, { autoAlpha: 1, y: mediaEnterY });
-      gsap.set(this.els.info, { autoAlpha: 1, y: infoEnterY });
-      gsap.set([this.els.title, ...blocks], { autoAlpha: 1 });
+      gsap.set(this.els.mobileTitle, { autoAlpha: 0, y: 22 });
+      gsap.set(this.els.mediaCol, {
+        autoAlpha: isMobileDetail ? 0 : 1,
+        y: isMobileDetail ? 34 : mediaEnterY,
+      });
+      gsap.set(this.els.info, {
+        autoAlpha: isMobileDetail ? 0 : 1,
+        y: isMobileDetail ? 28 : infoEnterY,
+      });
+      gsap.set(this.els.title, { autoAlpha: isMobileDetail ? 0 : 1 });
+      gsap.set(blocks, {
+        autoAlpha: isMobileDetail ? 0 : 1,
+        y: isMobileDetail ? 18 : 0,
+      });
       gsap.set(this.els.captures, { autoAlpha: 0 });
       gsap.set(this.els.overlay, { opacity: 0 });
 
@@ -983,16 +996,35 @@
         ? 0.03
         : Math.max(0.8, exitDuration + 0.08);
       tl.to(this.els.overlay, { opacity: 1, duration: reduced ? 0.01 : 0.28, ease: 'power1.out' }, detailStart);
+      if (isMobileDetail) {
+        tl.to(this.els.mobileTitle, {
+          autoAlpha: 1,
+          y: 0,
+          duration: reduced ? 0.01 : 0.52,
+          ease: 'power3.out',
+        }, detailStart + 0.04);
+      }
       tl.to(this.els.mediaCol, {
+        autoAlpha: 1,
         y: 0,
         duration: reduced ? 0.01 : 0.78,
         ease: 'power4.out',
       }, detailStart + 0.08);
       tl.to(this.els.info, {
+        autoAlpha: 1,
         y: 0,
         duration: reduced ? 0.01 : 0.7,
         ease: 'power4.out',
       }, detailStart + 0.16);
+      if (isMobileDetail && blocks.length) {
+        tl.to(blocks, {
+          autoAlpha: 1,
+          y: 0,
+          duration: reduced ? 0.01 : 0.46,
+          stagger: reduced ? 0 : 0.07,
+          ease: 'power3.out',
+        }, detailStart + 0.22);
+      }
       tl.to(this.els.close, { autoAlpha: 1, y: 0, duration: reduced ? 0.01 : 0.38, ease: 'power3.out' }, detailStart + 0.34);
       tl.to(this.els.captures, {
         autoAlpha: 1,
@@ -1007,13 +1039,16 @@
 
       const featured = qs(SELECTORS.pmodalFeatured, this.els.stage);
       const reduced = prefersReducedMotion();
+      const isMobileDetail = window.matchMedia('(max-width: 640px)').matches;
+      const blocks = qsa(SELECTORS.pmodalBlock, this.els.info).filter(block => !block.hidden);
       const transitionMedia = this.listTransitionMedia || this.list.items.map(item => item.media);
       const tl = gsap.timeline({
         onComplete: () => {
           pauseMedia(featured);
           this.els.modal.classList.remove('is-visible');
+          this.els.modal.setAttribute('aria-hidden', 'true');
           document.body.classList.remove('is-locked', 'is-project-transitioning');
-          gsap.set([featured, this.els.overlay, this.els.close, this.els.mediaCol, this.els.info, this.els.title, this.els.captures, ...qsa(SELECTORS.pmodalBlock, this.els.info)], { clearProps: 'all' });
+          gsap.set([featured, this.els.overlay, this.els.close, this.els.mediaCol, this.els.info, this.els.title, this.els.mobileTitle, this.els.captures, ...blocks], { clearProps: 'all' });
           gsap.set(transitionMedia, { clearProps: 'transform,opacity,visibility' });
           this.els.stage.replaceChildren();
           this.isAnimating = false;
@@ -1029,6 +1064,15 @@
       const exitStart = reduced ? 0.01 : 0.24;
       tl.to(this.els.captures, { autoAlpha: 0, duration: reduced ? 0.01 : 0.24, ease: 'power2.inOut' }, 0);
       tl.to(this.els.close, { autoAlpha: 0, duration: reduced ? 0.01 : 0.24, ease: 'power1.in' }, exitStart);
+      if (isMobileDetail) {
+        tl.to([this.els.mobileTitle, ...blocks], {
+          autoAlpha: 0,
+          y: -16,
+          duration: reduced ? 0.01 : 0.3,
+          stagger: reduced ? 0 : 0.025,
+          ease: 'power2.in',
+        }, exitStart);
+      }
       tl.to(this.els.mediaCol, { y: mediaExitY, duration: reduced ? 0.01 : 0.7, ease: 'power3.in' }, exitStart);
       tl.to(this.els.info, { y: infoExitY, duration: reduced ? 0.01 : 0.64, ease: 'power3.in' }, exitStart + 0.04);
       tl.to(this.els.overlay, { opacity: 0, duration: reduced ? 0.01 : 0.3, ease: 'power1.inOut' }, exitStart + 0.68);

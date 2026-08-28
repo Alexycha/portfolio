@@ -94,6 +94,7 @@
 
 html { 
   min-height: 100%;
+  min-height: 100lvh;
   background: var(--bg);
   scrollbar-width: none; 
   transition: background-color 0.4s ease;
@@ -107,7 +108,8 @@ body {
   position: relative;
   isolation: isolate;
   margin: 0; 
-  min-height: 100svh;
+  min-height: 100vh;
+  min-height: 100lvh;
   background: transparent; 
   color: var(--text);
   font-family: var(--font-main); 
@@ -270,7 +272,8 @@ img, video {
   position: fixed; 
   inset: 0; 
   width: 100%; 
-  height: 100svh;
+  height: 100vh;
+  height: 100lvh;
   z-index: var(--z-header); 
   pointer-events: none; 
   display: flex; 
@@ -464,7 +467,8 @@ body.is-snake-view .icon-list-view { display: block; }
   position: fixed; 
   inset: 0; 
   width: 100%; 
-  height: 100svh; 
+  height: 100vh;
+  height: 100lvh;
   overflow: hidden; 
   z-index: var(--z-content);
   display: flex; 
@@ -1034,7 +1038,8 @@ body.is-snake-view .media-slider-home {
 .pmodal {
   position: fixed;
   inset: 0;
-  height: 100svh;
+  height: 100vh;
+  height: 100lvh;
   z-index: var(--z-modal);
   opacity: 0;
   pointer-events: none;
@@ -1059,7 +1064,8 @@ body.is-snake-view .media-slider-home {
   z-index: 2;
   width: 100%;
   height: 100%;
-  min-height: 100svh;
+  min-height: 100vh;
+  min-height: 100lvh;
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -1205,6 +1211,9 @@ body.is-snake-view .media-slider-home {
 
 .pmodal__mobile-title {
   display: none;
+  opacity: 0;
+  transform: translateY(18px);
+  will-change: transform, opacity;
 }
 
 .pmodal__block {
@@ -1857,7 +1866,7 @@ body.is-snake-view .media-slider-home {
   }
 }
 
-body *:not(.home-projects__title):not(.home-projects__title *):not(.pmodal__title):not(.pmodal__title *):not(.mini-modal__title):not(.mini-modal__title *) {
+body *:not(.home-projects__title):not(.home-projects__title *):not(.pmodal__title):not(.pmodal__title *):not(.pmodal__mobile-title):not(.pmodal__mobile-title *):not(.mini-modal__title):not(.mini-modal__title *) {
   font-family: "Helvetica Neue", sans-serif;
   font-weight: 400;
   text-transform: uppercase;
@@ -1875,6 +1884,8 @@ body *:not(.home-projects__title):not(.home-projects__title *):not(.pmodal__titl
 .home-projects__title *,
 .pmodal__title,
 .pmodal__title *,
+.pmodal__mobile-title,
+.pmodal__mobile-title *,
 .mini-modal__title,
 .mini-modal__title * {
   font-family: var(--font-title);
@@ -2282,24 +2293,25 @@ body.is-vinyl-view .header-item__arrow {
   }
 
   body.is-vinyl-view .header-bottom-items {
-    width: min(calc(100vw - 44px - var(--safe-left) - var(--safe-right)), 390px);
+    width: min(100%, 390px);
     flex-wrap: wrap;
     justify-content: flex-end;
     gap: 10px 18px;
     margin-left: auto;
     overflow: visible;
-    padding: 0 5px 5px 0;
+    padding: 0 12px 8px 0;
     text-align: right;
   }
 
   body.is-vinyl-view .site-header__bottom {
-    left: calc(22px + var(--safe-left));
-    right: calc(22px + var(--safe-right));
-    bottom: calc(22px + var(--safe-bottom));
+    left: calc(24px + var(--safe-left));
+    right: calc(24px + var(--safe-right));
+    bottom: calc(28px + var(--safe-bottom));
+    width: auto;
   }
 
   body.is-vinyl-view .header-item:last-child {
-    margin-right: 2px;
+    margin-right: 4px;
   }
 
   body.is-vinyl-view .project-row.is-focused .project-row__header {
