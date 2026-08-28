@@ -3,9 +3,7 @@
   const qsa = (selector, root = document) => Array.from(root.querySelectorAll(selector));
   const miniOpenClass = 'is-open';
   const palettes = [
-    { id: 'cream-blue', bg: '#f1f1d9', text: '#011391', title: '#011391', darkBg: '#011391', darkText: '#f1f1d9', darkTitle: '#f1f1d9' },
-    { id: 'grey-olive', bg: '#ededed', text: '#605c04', title: '#605c04', darkBg: '#605c04', darkText: '#ededed', darkTitle: '#ededed' },
-    { id: 'red-linen', bg: '#e7e0d2', text: '#000000', title: '#980001', darkBg: '#980001', darkText: '#ffffff', darkTitle: '#e7e0d2' }
+    { id: 'monochrome', bg: '#ffffff', text: '#000000', title: '#000000', darkBg: '#000000', darkText: '#ffffff', darkTitle: '#ffffff' }
   ];
 
   const applyPalette = palette => {

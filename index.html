@@ -3,18 +3,17 @@
 <head><meta charset="UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="portfolio-visible-categories" content="website,branding,webdesign">
   <script>
     (function () {
-            document.documentElement.classList.add('is-home-intro-prep');
+      document.documentElement.classList.add('is-home-intro-prep');
       window.setTimeout(function () {
         document.documentElement.classList.remove('is-home-intro-prep');
       }, 3500);
-      
+
       var root = document.documentElement;
       var palettes = [
-        { id: 'cream-blue', bg: '#f1f1d9', text: '#011391', title: '#011391', darkBg: '#011391', darkText: '#f1f1d9', darkTitle: '#f1f1d9' },
-        { id: 'grey-olive', bg: '#ededed', text: '#605c04', title: '#605c04', darkBg: '#605c04', darkText: '#ededed', darkTitle: '#ededed' },
-        { id: 'red-linen', bg: '#e7e0d2', text: '#000000', title: '#980001', darkBg: '#980001', darkText: '#ffffff', darkTitle: '#e7e0d2' }
+        { id: 'monochrome', bg: '#ffffff', text: '#000000', title: '#000000', darkBg: '#000000', darkText: '#ffffff', darkTitle: '#ffffff' }
       ];
 
       try {
@@ -86,8 +85,8 @@ img:is([sizes=auto i],[sizes^="auto," i]){contain-intrinsic-size:3000px 1500px}
 /*# sourceURL=global-styles-inline-css */
 </style>
 <link rel="stylesheet" id="child-style-css" href="/portfolio//wp-content/themes/childtheme/style.css?ver=1768397124" media="all">
-<link rel="stylesheet" id="portfolio-fonts-css" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,600&amp;family=Instrument+Serif:ital@0;1&amp;display=swap" media="all">
-<link rel="stylesheet" id="custom-style-css" href="/portfolio//wp-content/themes/childtheme/assets/css/custom.css?ver=1787667600" media="all">
+<link rel="stylesheet" id="portfolio-fonts-css" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,600&amp;family=Instrument+Serif:ital@0;1&amp;family=Schoolbell&amp;display=swap" media="all">
+<link rel="stylesheet" id="custom-style-css" href="/portfolio//wp-content/themes/childtheme/assets/css/custom.css?ver=1787884015" media="all">
 <style id="twentytwentyfive-style-inline-css">
 a{text-decoration-thickness:1px!important;text-underline-offset:.1em}:where(.wp-site-blocks :focus){outline-width:2px;outline-style:solid}.wp-block-navigation .wp-block-navigation-submenu .wp-block-navigation-item:not(:last-child){margin-bottom:3px}.wp-block-navigation .wp-block-navigation-item .wp-block-navigation-item__content{outline-offset:4px}.wp-block-navigation .wp-block-navigation-item ul.wp-block-navigation__submenu-container .wp-block-navigation-item__content{outline-offset:0}blockquote,caption,figcaption,h1,h2,h3,h4,h5,h6,p{text-wrap:pretty}.more-link{display:block}:where(pre){overflow-x:auto}
 /*# sourceURL=/portfolio//wp-content/themes/twentytwentyfive/style.min.css */
@@ -102,16 +101,15 @@ a{text-decoration-thickness:1px!important;text-underline-offset:.1em}:where(.wp-
 </style>
 </head>
 
-<body class="home wp-singular page-template-default page page-id-14 wp-embed-responsive wp-theme-twentytwentyfive wp-child-theme-childtheme is-snake-view">
+<body class="home wp-singular page-template-default page page-id-14 wp-embed-responsive wp-theme-twentytwentyfive wp-child-theme-childtheme is-vinyl-view">
 
 <div class="mini-modal" id="miniModalAbout" aria-hidden="true">
   <div class="mini-modal__overlay" data-mini-close></div>
-  <div class="mini-modal__box" role="dialog" aria-modal="true" aria-labelledby="miniModalAboutTitle" data-mini-close>
+  <div class="mini-modal__box" role="dialog" aria-modal="true" aria-label="About" data-mini-close>
     <button class="mini-modal__close unified-text" type="button" data-mini-close aria-label="Close About">CLOSE</button>
     <div class="mini-modal__content" data-mini-stop>
-      <h2 class="mini-modal__title" id="miniModalAboutTitle">About</h2>
     <p class="mini-modal__text" data-mini-stop>
-        Designer &amp; Developer based in Luxembourg. I create precise digital identities, interactive interfaces and front-end experiences with a focus on motion, typography and clean execution.
+        Designer &amp; Developer based between Luxembourg and Paris. I create precise digital identities, interactive interfaces and front-end experiences with a focus on motion, typography and clean execution.
     </p>
     </div>
   </div>
@@ -119,10 +117,9 @@ a{text-decoration-thickness:1px!important;text-underline-offset:.1em}:where(.wp-
 
 <div class="mini-modal" id="miniModalContact" aria-hidden="true">
   <div class="mini-modal__overlay" data-mini-close></div>
-  <div class="mini-modal__box" role="dialog" aria-modal="true" aria-labelledby="miniModalContactTitle" data-mini-close>
+  <div class="mini-modal__box" role="dialog" aria-modal="true" aria-label="Contact" data-mini-close>
     <button class="mini-modal__close unified-text" type="button" data-mini-close aria-label="Close Contact">CLOSE</button>
     <div class="mini-modal__content" data-mini-stop>
-      <h2 class="mini-modal__title" id="miniModalContactTitle">Contact</h2>
     <p class="mini-modal__text" data-mini-stop>
         <a href="mailto:alexychalopin@gmail.com">alexychalopin@gmail.com</a>
     </p>
@@ -132,11 +129,11 @@ a{text-decoration-thickness:1px!important;text-underline-offset:.1em}:where(.wp-
 
 <header class="site-header" data-site-header>
   <div class="site-header__top">
-    <span class="site-header__role unified-text">DESIGNER &amp; DEVELOPER</span>
-    
+    <span class="site-header__role unified-text">Designer &amp; Developer</span>
+
     <nav class="site-header__nav" aria-label="Primary">
-      <button class="site-header__link unified-text" type="button" data-open="about">ABOUT</button>
-      <button class="site-header__link unified-text" type="button" data-open="contact">CONTACT</button>
+      <button class="site-header__link unified-text" type="button" data-open="about">About</button>
+      <button class="site-header__link unified-text" type="button" data-open="contact">Contact</button>
     </nav>
   </div>
 
@@ -151,23 +148,23 @@ a{text-decoration-thickness:1px!important;text-underline-offset:.1em}:where(.wp-
     <div class="header-bottom-items">
             <div class="header-item">
         <span class="header-item__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
-        <span class="header-item__text unified-text">INSTAGRAM<br>
-LINKEDIN</span>
+        <span class="header-item__text unified-text">Instagram<br>
+Linkedin</span>
       </div>
             <div class="header-item">
         <span class="header-item__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
-        <span class="header-item__text unified-text">WORK AT<br>
-ECOMLUX</span>
+        <span class="header-item__text unified-text">Work at<br>
+Ecomlux</span>
       </div>
             <div class="header-item">
         <span class="header-item__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
-        <span class="header-item__text unified-text">WORKED AT<br>
-LORWEB</span>
+        <span class="header-item__text unified-text">Worked at<br>
+Lorweb</span>
       </div>
             <div class="header-item">
         <span class="header-item__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
-        <span class="header-item__text unified-text">© ALEXY<br>
-CHALOPIN</span>
+        <span class="header-item__text unified-text">© Alexy<br>
+Chalopin</span>
       </div>
           </div>
   </div>
@@ -176,9 +173,9 @@ CHALOPIN</span>
 <main class="home-projects" data-home-projects>
   <h1 class="home-projects__title">Alexy</h1>
   <div class="home-projects__wrapper">
-           
-      
-        <article class="project-row" data-project-row data-title="COFT" data-description="A studio working at the seam of landscape, software, and the cities yet to come — building the digital ground on which better decisions grow." data-services="[&quot;Webdesign&quot;,&quot;Development&quot;]" data-images="[&quot;\/portfolio\/\/wp-content\/uploads\/2026\/04\/coft-maquette-e1779026590167-1024x746.webp&quot;,&quot;\/portfolio\/\/wp-content\/uploads\/2026\/01\/COFT-2-1024x614.jpg&quot;,&quot;\/portfolio\/\/wp-content\/uploads\/2026\/01\/COFT-1024x614.jpg&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/04/coft-maquette-e1779026590167-1024x746.webp" data-featured-video="" data-featured-type="image" role="button" tabindex="0" aria-label="Open project: COFT">
+
+
+                                                                                                                                                                                                        <article class="project-row" data-project-row data-title="COFT" data-description="A studio working at the seam of landscape, software, and the cities yet to come — building the digital ground on which better decisions grow." data-services="[&quot;Webdesign&quot;,&quot;Development&quot;]" data-categories="[&quot;website&quot;,&quot;webdesign&quot;]" data-images="[&quot;/portfolio//wp-content/uploads/2026/01/COFT-2-1024x614.jpg&quot;,&quot;/portfolio//wp-content/uploads/2026/01/COFT-1024x614.jpg&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/01/COFT-2-1024x614.jpg" data-featured-video="/portfolio//wp-content/uploads/projects/screen-recording-2026-08-27-at-16-41-35-mtbnnyrw.mp4" data-featured-type="video" data-project-url="https://coft.lu/" role="button" tabindex="0" aria-label="Open project: COFT">
           <div class="project-row__header">
             <div class="project-row__left">
               <span class="project-row__index unified-text">01</span>
@@ -192,16 +189,18 @@ CHALOPIN</span>
           </div>
 
           <div class="project-row__media">
-                          <img width="1024" height="746" src="/portfolio//wp-content/uploads/2026/04/coft-maquette-e1779026590167-1024x746.webp" class="project-row__media-el" alt="COFT" loading="eager" decoding="async" sizes="(max-width: 760px) 54vw, (max-width: 1200px) 24vw, 22vw" fetchpriority="high" srcset="/portfolio//wp-content/uploads/2026/04/coft-maquette-e1779026590167-1024x746.webp 1024w, /portfolio//wp-content/uploads/2026/04/coft-maquette-e1779026590167-300x219.webp 300w, /portfolio//wp-content/uploads/2026/04/coft-maquette-e1779026590167-768x559.webp 768w, /portfolio//wp-content/uploads/2026/04/coft-maquette-e1779026590167-1536x1119.webp 1536w, /portfolio//wp-content/uploads/2026/04/coft-maquette-e1779026590167-2048x1492.webp 2048w">                      </div>
+            <img width="1024" height="614" src="/portfolio//wp-content/uploads/2026/01/COFT-2-1024x614.jpg" class="project-row__media-el project-row__media-image" alt="COFT" loading="eager" decoding="async" sizes="(max-width: 760px) 66vw, (max-width: 1200px) 32vw, 28vw" fetchpriority="high">
+              <video src="/portfolio//wp-content/uploads/projects/screen-recording-2026-08-27-at-16-41-35-mtbnnyrw.mp4" poster="/portfolio//wp-content/uploads/2026/01/COFT-2-1024x614.jpg" class="project-row__media-el project-row__media-video" muted loop playsinline preload="metadata" aria-label="COFT"></video>
+          </div>
         </article>
 
-       
-      
-        <article class="project-row" data-project-row data-title="Venom" data-description="" data-services="[&quot;Draw&quot;]" data-images="[&quot;\/portfolio\/\/wp-content\/uploads\/2026\/05\/venom-697x1024.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/05/venom-697x1024.webp" data-featured-video="" data-featured-type="image" role="button" tabindex="0" aria-label="Open project: Venom">
+
+
+        <article class="project-row" data-project-row data-title="Argxnto" data-description="" data-services="[]" data-categories="[&quot;website&quot;,&quot;branding&quot;,&quot;webdesign&quot;]" data-images="[&quot;/portfolio//wp-content/uploads/projects/screenshot-2026-08-27-at-17-19-03-mtbo7vi4.webp&quot;,&quot;/portfolio//wp-content/uploads/projects/screenshot-2026-08-27-at-17-19-35-mtbo7vom.webp&quot;,&quot;/portfolio//wp-content/uploads/projects/screenshot-2026-08-27-at-17-19-58-mtbo7vvw.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/projects/screenshot-2026-08-27-at-17-19-03-mtbo7vi4.webp" data-featured-video="/portfolio//wp-content/uploads/projects/untitled-2-mtboogce.mp4" data-featured-type="video" data-project-url="https://romainargento.com/" role="button" tabindex="0" aria-label="Open project: Argxnto">
           <div class="project-row__header">
             <div class="project-row__left">
               <span class="project-row__index unified-text">02</span>
-              <h2 class="project-row__title unified-text">Venom</h2>
+              <h2 class="project-row__title unified-text">Argxnto</h2>
             </div>
 
             <div class="project-row__right">
@@ -211,205 +210,17 @@ CHALOPIN</span>
           </div>
 
           <div class="project-row__media">
-                          <img width="697" height="1024" src="/portfolio//wp-content/uploads/2026/05/venom-697x1024.webp" class="project-row__media-el" alt="Venom" loading="eager" decoding="async" sizes="(max-width: 760px) 54vw, (max-width: 1200px) 24vw, 22vw" srcset="/portfolio//wp-content/uploads/2026/05/venom-697x1024.webp 697w, /portfolio//wp-content/uploads/2026/05/venom-204x300.webp 204w, /portfolio//wp-content/uploads/2026/05/venom-768x1128.webp 768w, /portfolio//wp-content/uploads/2026/05/venom-1046x1536.webp 1046w, /portfolio//wp-content/uploads/2026/05/venom.webp 1307w">                      </div>
+            <img width="2400" height="1280" src="/portfolio//wp-content/uploads/projects/screenshot-2026-08-27-at-17-19-03-mtbo7vi4.webp" class="project-row__media-el project-row__media-image" alt="Argxnto" loading="eager" decoding="async" sizes="(max-width: 760px) 66vw, (max-width: 1200px) 32vw, 28vw">
+              <video src="/portfolio//wp-content/uploads/projects/untitled-2-mtboogce.mp4" poster="/portfolio//wp-content/uploads/projects/screenshot-2026-08-27-at-17-19-03-mtbo7vi4.webp" class="project-row__media-el project-row__media-video" muted loop playsinline preload="metadata" aria-label="Argxnto"></video>
+          </div>
         </article>
 
-       
-      
-        <article class="project-row" data-project-row data-title="Ludovissy" data-description="Design and development of a showcase website for a law firm, with particular attention paid to elegance, clarity of information, and visual credibility. The objective was to convey seriousness and legal expertise through a clean design, carefully chosen typography, and smooth navigation. The site was optimized to offer an intuitive user experience, facilitating access to areas of expertise and contact information." data-services="[&quot;Webdesign&quot;,&quot;Development&quot;]" data-images="[&quot;\/portfolio\/\/wp-content\/uploads\/2026\/02\/home-2-1024x586.webp&quot;,&quot;\/portfolio\/\/wp-content\/uploads\/2026\/02\/page-2-1024x586.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/02/home-2-1024x586.webp" data-featured-video="" data-featured-type="image" role="button" tabindex="0" aria-label="Open project: Ludovissy">
+
+
+        <article class="project-row" data-project-row data-title="2% Films" data-description="Website design for an audiovisual production company, showcasing its projects and artistic vision. The design prioritizes visuals and storytelling, with seamless navigation for easy exploration of the productions. The site was conceived as an immersive showcase, highlighting the visual work while ensuring optimal performance." data-services="[&quot;Webdesign&quot;,&quot;Development&quot;,&quot;Graphisme&quot;,&quot;Branding&quot;]" data-categories="[&quot;branding&quot;,&quot;webdesign&quot;]" data-images="[&quot;/portfolio//wp-content/uploads/2026/01/home-3-1024x586.webp&quot;,&quot;/portfolio//wp-content/uploads/2026/01/lecteur-1024x586.webp&quot;,&quot;/portfolio//wp-content/uploads/2026/01/home-dz-1024x586.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/01/home-3-1024x586.webp" data-featured-video="/portfolio//wp-content/uploads/projects/screen-recording-2026-08-27-at-17-30-19-mtbok4wu.mp4" data-featured-type="video" data-project-url="https://deuxpourcent-films.com/" role="button" tabindex="0" aria-label="Open project: 2% Films">
           <div class="project-row__header">
             <div class="project-row__left">
               <span class="project-row__index unified-text">03</span>
-              <h2 class="project-row__title unified-text">Ludovissy</h2>
-            </div>
-
-            <div class="project-row__right">
-              <span class="project-row__cta unified-text">SEE MORE</span>
-              <span class="project-row__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
-            </div>
-          </div>
-
-          <div class="project-row__media">
-                          <img width="1024" height="586" src="/portfolio//wp-content/uploads/2026/02/home-2-1024x586.webp" class="project-row__media-el" alt="Ludovissy" loading="eager" decoding="async" sizes="(max-width: 760px) 54vw, (max-width: 1200px) 24vw, 22vw" srcset="/portfolio//wp-content/uploads/2026/02/home-2-1024x586.webp 1024w, /portfolio//wp-content/uploads/2026/02/home-2-300x172.webp 300w, /portfolio//wp-content/uploads/2026/02/home-2-768x439.webp 768w, /portfolio//wp-content/uploads/2026/02/home-2-1536x878.webp 1536w, /portfolio//wp-content/uploads/2026/02/home-2-2048x1171.webp 2048w">                      </div>
-        </article>
-
-       
-      
-        <article class="project-row" data-project-row data-title="Album" data-description="" data-services="[&quot;Draw&quot;]" data-images="[&quot;\/portfolio\/\/wp-content\/uploads\/2026\/05\/une-vie-a-deux-1012x1024.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/05/une-vie-a-deux-1012x1024.webp" data-featured-video="" data-featured-type="image" role="button" tabindex="0" aria-label="Open project: Album">
-          <div class="project-row__header">
-            <div class="project-row__left">
-              <span class="project-row__index unified-text">04</span>
-              <h2 class="project-row__title unified-text">Album</h2>
-            </div>
-
-            <div class="project-row__right">
-              <span class="project-row__cta unified-text">SEE MORE</span>
-              <span class="project-row__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
-            </div>
-          </div>
-
-          <div class="project-row__media">
-                          <img width="1012" height="1024" src="/portfolio//wp-content/uploads/2026/05/une-vie-a-deux-1012x1024.webp" class="project-row__media-el" alt="Album" loading="lazy" decoding="async" sizes="auto, (max-width: 760px) 54vw, (max-width: 1200px) 24vw, 22vw" srcset="/portfolio//wp-content/uploads/2026/05/une-vie-a-deux-1012x1024.webp 1012w, /portfolio//wp-content/uploads/2026/05/une-vie-a-deux-296x300.webp 296w, /portfolio//wp-content/uploads/2026/05/une-vie-a-deux-768x777.webp 768w, /portfolio//wp-content/uploads/2026/05/une-vie-a-deux-1518x1536.webp 1518w, /portfolio//wp-content/uploads/2026/05/une-vie-a-deux.webp 1897w">                      </div>
-        </article>
-
-       
-      
-        <article class="project-row" data-project-row data-title="PICK Immobilier" data-description="Creation of a website for a real estate agency in Germany, focusing on showcasing properties and ensuring a clear user experience. The project involved effectively structuring property listings, optimizing property searches, and providing a reassuring and professional interface. The design was conceived to inspire confidence while facilitating contact." data-services="[&quot;Webdesign&quot;,&quot;Development&quot;]" data-images="[&quot;\/portfolio\/\/wp-content\/uploads\/2026\/02\/pick-1024x868.png&quot;,&quot;\/portfolio\/\/wp-content\/uploads\/2026\/02\/PICK-1-1024x614.jpg&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/02/pick-1024x868.png" data-featured-video="" data-featured-type="image" role="button" tabindex="0" aria-label="Open project: PICK Immobilier">
-          <div class="project-row__header">
-            <div class="project-row__left">
-              <span class="project-row__index unified-text">05</span>
-              <h2 class="project-row__title unified-text">PICK Immobilier</h2>
-            </div>
-
-            <div class="project-row__right">
-              <span class="project-row__cta unified-text">SEE MORE</span>
-              <span class="project-row__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
-            </div>
-          </div>
-
-          <div class="project-row__media">
-                          <img width="1024" height="868" src="/portfolio//wp-content/uploads/2026/02/pick-1024x868.png" class="project-row__media-el" alt="PICK Immobilier" loading="lazy" decoding="async" sizes="auto, (max-width: 760px) 54vw, (max-width: 1200px) 24vw, 22vw" srcset="/portfolio//wp-content/uploads/2026/02/pick-1024x868.png 1024w, /portfolio//wp-content/uploads/2026/02/pick-300x254.png 300w, /portfolio//wp-content/uploads/2026/02/pick-768x651.png 768w, /portfolio//wp-content/uploads/2026/02/pick-1536x1302.png 1536w, /portfolio//wp-content/uploads/2026/02/pick-2048x1736.png 2048w">                      </div>
-        </article>
-
-       
-      
-        <article class="project-row" data-project-row data-title="View from the window" data-description="" data-services="[&quot;Draw&quot;]" data-images="[&quot;\/portfolio\/\/wp-content\/uploads\/2026\/05\/landscape-1024x693.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/05/landscape-1024x693.webp" data-featured-video="" data-featured-type="image" role="button" tabindex="0" aria-label="Open project: View from the window">
-          <div class="project-row__header">
-            <div class="project-row__left">
-              <span class="project-row__index unified-text">06</span>
-              <h2 class="project-row__title unified-text">View from the window</h2>
-            </div>
-
-            <div class="project-row__right">
-              <span class="project-row__cta unified-text">SEE MORE</span>
-              <span class="project-row__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
-            </div>
-          </div>
-
-          <div class="project-row__media">
-                          <img width="1024" height="693" src="/portfolio//wp-content/uploads/2026/05/landscape-1024x693.webp" class="project-row__media-el" alt="View from the window" loading="lazy" decoding="async" sizes="auto, (max-width: 760px) 54vw, (max-width: 1200px) 24vw, 22vw" srcset="/portfolio//wp-content/uploads/2026/05/landscape-1024x693.webp 1024w, /portfolio//wp-content/uploads/2026/05/landscape-300x203.webp 300w, /portfolio//wp-content/uploads/2026/05/landscape-768x519.webp 768w, /portfolio//wp-content/uploads/2026/05/landscape-1536x1039.webp 1536w, /portfolio//wp-content/uploads/2026/05/landscape-2048x1385.webp 2048w">                      </div>
-        </article>
-
-       
-      
-        <article class="project-row" data-project-row data-title="Olliewood" data-description="Design and development of an e-commerce website for a skate and sportswear shop in Luxembourg. The project combined a modern art direction with a seamless shopping experience, showcasing the products, collections, and brand identity. Particular attention was paid to performance, responsive design, and user journey optimization to maximize conversion rates." data-services="[&quot;Webdesign&quot;,&quot;Development&quot;,&quot;Graphisme&quot;,&quot;Branding&quot;]" data-images="[&quot;\/portfolio\/\/wp-content\/uploads\/2026\/01\/hero-ollie-1024x586.webp&quot;,&quot;\/portfolio\/\/wp-content\/uploads\/2026\/01\/page-ollie-2-1024x586.webp&quot;,&quot;\/portfolio\/\/wp-content\/uploads\/2026\/01\/shop-1024x586.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/01/hero-ollie-1024x586.webp" data-featured-video="" data-featured-type="image" role="button" tabindex="0" aria-label="Open project: Olliewood">
-          <div class="project-row__header">
-            <div class="project-row__left">
-              <span class="project-row__index unified-text">07</span>
-              <h2 class="project-row__title unified-text">Olliewood</h2>
-            </div>
-
-            <div class="project-row__right">
-              <span class="project-row__cta unified-text">SEE MORE</span>
-              <span class="project-row__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
-            </div>
-          </div>
-
-          <div class="project-row__media">
-                          <img width="1024" height="586" src="/portfolio//wp-content/uploads/2026/01/hero-ollie-1024x586.webp" class="project-row__media-el" alt="Olliewood" loading="lazy" decoding="async" sizes="auto, (max-width: 760px) 54vw, (max-width: 1200px) 24vw, 22vw" srcset="/portfolio//wp-content/uploads/2026/01/hero-ollie-1024x586.webp 1024w, /portfolio//wp-content/uploads/2026/01/hero-ollie-300x172.webp 300w, /portfolio//wp-content/uploads/2026/01/hero-ollie-768x439.webp 768w, /portfolio//wp-content/uploads/2026/01/hero-ollie-1536x878.webp 1536w, /portfolio//wp-content/uploads/2026/01/hero-ollie-2048x1171.webp 2048w">                      </div>
-        </article>
-
-       
-      
-        <article class="project-row" data-project-row data-title="Logan" data-description="" data-services="[&quot;Draw&quot;]" data-images="[&quot;\/portfolio\/\/wp-content\/uploads\/2026\/05\/wolverine-702x1024.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/05/wolverine-702x1024.webp" data-featured-video="" data-featured-type="image" role="button" tabindex="0" aria-label="Open project: Logan">
-          <div class="project-row__header">
-            <div class="project-row__left">
-              <span class="project-row__index unified-text">08</span>
-              <h2 class="project-row__title unified-text">Logan</h2>
-            </div>
-
-            <div class="project-row__right">
-              <span class="project-row__cta unified-text">SEE MORE</span>
-              <span class="project-row__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
-            </div>
-          </div>
-
-          <div class="project-row__media">
-                          <img width="702" height="1024" src="/portfolio//wp-content/uploads/2026/05/wolverine-702x1024.webp" class="project-row__media-el" alt="Logan" loading="lazy" decoding="async" sizes="auto, (max-width: 760px) 54vw, (max-width: 1200px) 24vw, 22vw" srcset="/portfolio//wp-content/uploads/2026/05/wolverine-702x1024.webp 702w, /portfolio//wp-content/uploads/2026/05/wolverine-206x300.webp 206w, /portfolio//wp-content/uploads/2026/05/wolverine-768x1120.webp 768w, /portfolio//wp-content/uploads/2026/05/wolverine-1054x1536.webp 1054w, /portfolio//wp-content/uploads/2026/05/wolverine.webp 1317w">                      </div>
-        </article>
-
-       
-      
-        <article class="project-row" data-project-row data-title="Performance" data-description="Design and development of a website for a leading automotive performance workshop in Luxembourg. The project highlights the combination of family tradition, mechanical expertise, and cutting-edge technologies. The design approach was conceived to reflect a premium and technical world, showcasing vehicles ranging from sports cars to classic models. Particular attention was paid to visual impact, seamless navigation, and highlighting services to strengthen the workshop's brand image and credibility." data-services="[&quot;Webdesign&quot;,&quot;Development&quot;]" data-images="[&quot;\/portfolio\/\/wp-content\/uploads\/2026\/01\/SA704090-1024x577.jpg&quot;,&quot;\/portfolio\/\/wp-content\/uploads\/2026\/02\/home-1024x586.webp&quot;,&quot;\/portfolio\/\/wp-content\/uploads\/2026\/01\/LAMBERT-2-1024x614.jpg&quot;,&quot;\/portfolio\/\/wp-content\/uploads\/2026\/02\/page-1024x586.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/01/SA704090-1024x577.jpg" data-featured-video="" data-featured-type="image" role="button" tabindex="0" aria-label="Open project: Performance">
-          <div class="project-row__header">
-            <div class="project-row__left">
-              <span class="project-row__index unified-text">09</span>
-              <h2 class="project-row__title unified-text">Performance</h2>
-            </div>
-
-            <div class="project-row__right">
-              <span class="project-row__cta unified-text">SEE MORE</span>
-              <span class="project-row__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
-            </div>
-          </div>
-
-          <div class="project-row__media">
-                          <img width="1024" height="577" src="/portfolio//wp-content/uploads/2026/01/SA704090-1024x577.jpg" class="project-row__media-el" alt="Performance" loading="lazy" decoding="async" sizes="auto, (max-width: 760px) 54vw, (max-width: 1200px) 24vw, 22vw" srcset="/portfolio//wp-content/uploads/2026/01/SA704090-1024x577.jpg 1024w, /portfolio//wp-content/uploads/2026/01/SA704090-300x169.jpg 300w, /portfolio//wp-content/uploads/2026/01/SA704090-768x432.jpg 768w, /portfolio//wp-content/uploads/2026/01/SA704090-1536x865.jpg 1536w, /portfolio//wp-content/uploads/2026/01/SA704090-2048x1153.jpg 2048w">                      </div>
-        </article>
-
-       
-      
-        <article class="project-row" data-project-row data-title="Cat" data-description="" data-services="[&quot;Draw&quot;]" data-images="[&quot;\/portfolio\/\/wp-content\/uploads\/2026\/05\/cat-1024x724.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/05/cat-1024x724.webp" data-featured-video="" data-featured-type="image" role="button" tabindex="0" aria-label="Open project: Cat">
-          <div class="project-row__header">
-            <div class="project-row__left">
-              <span class="project-row__index unified-text">10</span>
-              <h2 class="project-row__title unified-text">Cat</h2>
-            </div>
-
-            <div class="project-row__right">
-              <span class="project-row__cta unified-text">SEE MORE</span>
-              <span class="project-row__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
-            </div>
-          </div>
-
-          <div class="project-row__media">
-                          <img width="1024" height="724" src="/portfolio//wp-content/uploads/2026/05/cat-1024x724.webp" class="project-row__media-el" alt="Cat" loading="lazy" decoding="async" sizes="auto, (max-width: 760px) 54vw, (max-width: 1200px) 24vw, 22vw" srcset="/portfolio//wp-content/uploads/2026/05/cat-1024x724.webp 1024w, /portfolio//wp-content/uploads/2026/05/cat-300x212.webp 300w, /portfolio//wp-content/uploads/2026/05/cat-768x543.webp 768w, /portfolio//wp-content/uploads/2026/05/cat-1536x1085.webp 1536w, /portfolio//wp-content/uploads/2026/05/cat-2048x1447.webp 2048w">                      </div>
-        </article>
-
-       
-      
-        <article class="project-row" data-project-row data-title="EDI Madagascar" data-description="Development of a website for an NGO, with the aim of showcasing its mission, activities, and social impact. The project involved creating a clear structure to present the organization's projects, news, and ways to support it. Particular attention was paid to accessibility and readability to reach a broad, international audience." data-services="[&quot;Webdesign&quot;,&quot;Development&quot;]" data-images="[&quot;\/portfolio\/\/wp-content\/uploads\/2026\/01\/edi-1024x744.png&quot;,&quot;\/portfolio\/\/wp-content\/uploads\/2026\/01\/EDI-mob-1024x666.png&quot;,&quot;\/portfolio\/\/wp-content\/uploads\/2026\/02\/hero-1-1024x586.webp&quot;,&quot;\/portfolio\/\/wp-content\/uploads\/2026\/02\/home-1-1024x586.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/01/edi-1024x744.png" data-featured-video="" data-featured-type="image" role="button" tabindex="0" aria-label="Open project: EDI Madagascar">
-          <div class="project-row__header">
-            <div class="project-row__left">
-              <span class="project-row__index unified-text">11</span>
-              <h2 class="project-row__title unified-text">EDI Madagascar</h2>
-            </div>
-
-            <div class="project-row__right">
-              <span class="project-row__cta unified-text">SEE MORE</span>
-              <span class="project-row__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
-            </div>
-          </div>
-
-          <div class="project-row__media">
-                          <img width="1024" height="744" src="/portfolio//wp-content/uploads/2026/01/edi-1024x744.png" class="project-row__media-el" alt="EDI Madagascar" loading="lazy" decoding="async" sizes="auto, (max-width: 760px) 54vw, (max-width: 1200px) 24vw, 22vw" srcset="/portfolio//wp-content/uploads/2026/01/edi-1024x744.png 1024w, /portfolio//wp-content/uploads/2026/01/edi-300x218.png 300w, /portfolio//wp-content/uploads/2026/01/edi-768x558.png 768w, /portfolio//wp-content/uploads/2026/01/edi-1536x1116.png 1536w, /portfolio//wp-content/uploads/2026/01/edi-2048x1488.png 2048w">                      </div>
-        </article>
-
-       
-      
-        <article class="project-row" data-project-row data-title="Alternative" data-description="" data-services="[&quot;Draw&quot;]" data-images="[&quot;\/portfolio\/\/wp-content\/uploads\/2026\/05\/alt-676x1024.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/05/alt-676x1024.webp" data-featured-video="" data-featured-type="image" role="button" tabindex="0" aria-label="Open project: Alternative">
-          <div class="project-row__header">
-            <div class="project-row__left">
-              <span class="project-row__index unified-text">12</span>
-              <h2 class="project-row__title unified-text">Alternative</h2>
-            </div>
-
-            <div class="project-row__right">
-              <span class="project-row__cta unified-text">SEE MORE</span>
-              <span class="project-row__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
-            </div>
-          </div>
-
-          <div class="project-row__media">
-                          <img width="676" height="1024" src="/portfolio//wp-content/uploads/2026/05/alt-676x1024.webp" class="project-row__media-el" alt="Alternative" loading="lazy" decoding="async" sizes="auto, (max-width: 760px) 54vw, (max-width: 1200px) 24vw, 22vw" srcset="/portfolio//wp-content/uploads/2026/05/alt-676x1024.webp 676w, /portfolio//wp-content/uploads/2026/05/alt-198x300.webp 198w, /portfolio//wp-content/uploads/2026/05/alt-768x1163.webp 768w, /portfolio//wp-content/uploads/2026/05/alt-1014x1536.webp 1014w, /portfolio//wp-content/uploads/2026/05/alt.webp 1268w">                      </div>
-        </article>
-
-       
-      
-        <article class="project-row" data-project-row data-title="2% Films" data-description="Website design for an audiovisual production company, showcasing its projects and artistic vision. The design prioritizes visuals and storytelling, with seamless navigation for easy exploration of the productions. The site was conceived as an immersive showcase, highlighting the visual work while ensuring optimal performance." data-services="[&quot;Webdesign&quot;,&quot;Development&quot;,&quot;Graphisme&quot;,&quot;Branding&quot;]" data-images="[&quot;\/portfolio\/\/wp-content\/uploads\/2026\/01\/home-3-1024x586.webp&quot;,&quot;\/portfolio\/\/wp-content\/uploads\/2026\/01\/lecteur-1024x586.webp&quot;,&quot;\/portfolio\/\/wp-content\/uploads\/2026\/01\/home-dz-1024x586.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/01/home-3-1024x586.webp" data-featured-video="" data-featured-type="image" role="button" tabindex="0" aria-label="Open project: 2% Films">
-          <div class="project-row__header">
-            <div class="project-row__left">
-              <span class="project-row__index unified-text">13</span>
               <h2 class="project-row__title unified-text">2% Films</h2>
             </div>
 
@@ -420,15 +231,240 @@ CHALOPIN</span>
           </div>
 
           <div class="project-row__media">
-                          <img width="1024" height="586" src="/portfolio//wp-content/uploads/2026/01/home-3-1024x586.webp" class="project-row__media-el" alt="2% Films" loading="lazy" decoding="async" sizes="auto, (max-width: 760px) 54vw, (max-width: 1200px) 24vw, 22vw" srcset="/portfolio//wp-content/uploads/2026/01/home-3-1024x586.webp 1024w, /portfolio//wp-content/uploads/2026/01/home-3-300x172.webp 300w, /portfolio//wp-content/uploads/2026/01/home-3-768x439.webp 768w, /portfolio//wp-content/uploads/2026/01/home-3-1536x878.webp 1536w, /portfolio//wp-content/uploads/2026/01/home-3-2048x1171.webp 2048w">                      </div>
+            <img width="1024" height="586" src="/portfolio//wp-content/uploads/2026/01/home-3-1024x586.webp" class="project-row__media-el project-row__media-image" alt="2% Films" loading="eager" decoding="async" sizes="(max-width: 760px) 66vw, (max-width: 1200px) 32vw, 28vw">
+              <video src="/portfolio//wp-content/uploads/projects/screen-recording-2026-08-27-at-17-30-19-mtbok4wu.mp4" poster="/portfolio//wp-content/uploads/2026/01/home-3-1024x586.webp" class="project-row__media-el project-row__media-video" muted loop playsinline preload="metadata" aria-label="2% Films"></video>
+          </div>
         </article>
 
-       
-      
-        <article class="project-row" data-project-row data-title="Batou" data-description="" data-services="[&quot;Draw&quot;]" data-images="[&quot;\/portfolio\/\/wp-content\/uploads\/2026\/05\/batou-722x1024.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/05/batou-722x1024.webp" data-featured-video="" data-featured-type="image" role="button" tabindex="0" aria-label="Open project: Batou">
+
+
+        <article class="project-row" data-project-row data-title="Olliewood" data-description="Design and development of an e-commerce website for a skate and sportswear shop in Luxembourg. The project combined a modern art direction with a seamless shopping experience, showcasing the products, collections, and brand identity. Particular attention was paid to performance, responsive design, and user journey optimization to maximize conversion rates." data-services="[&quot;Webdesign&quot;,&quot;Development&quot;,&quot;Graphisme&quot;,&quot;Branding&quot;]" data-categories="[&quot;branding&quot;,&quot;webdesign&quot;]" data-images="[&quot;/portfolio//wp-content/uploads/2026/01/hero-ollie-1024x586.webp&quot;,&quot;/portfolio//wp-content/uploads/2026/01/page-ollie-2-1024x586.webp&quot;,&quot;/portfolio//wp-content/uploads/2026/01/shop-1024x586.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/01/hero-ollie-1024x586.webp" data-featured-video="" data-featured-type="image" data-project-url="https://olliewood.lu/" role="button" tabindex="0" aria-label="Open project: Olliewood">
+          <div class="project-row__header">
+            <div class="project-row__left">
+              <span class="project-row__index unified-text">04</span>
+              <h2 class="project-row__title unified-text">Olliewood</h2>
+            </div>
+
+            <div class="project-row__right">
+              <span class="project-row__cta unified-text">SEE MORE</span>
+              <span class="project-row__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
+            </div>
+          </div>
+
+          <div class="project-row__media">
+            <img width="1024" height="586" src="/portfolio//wp-content/uploads/2026/01/hero-ollie-1024x586.webp" class="project-row__media-el" alt="Olliewood" loading="lazy" decoding="async" sizes="(max-width: 760px) 54vw, (max-width: 1200px) 24vw, 22vw">
+          </div>
+        </article>
+
+
+
+        <article class="project-row" data-project-row data-title="Performance" data-description="Design and development of a website for a leading automotive performance workshop in Luxembourg. The project highlights the combination of family tradition, mechanical expertise, and cutting-edge technologies. The design approach was conceived to reflect a premium and technical world, showcasing vehicles ranging from sports cars to classic models. Particular attention was paid to visual impact, seamless navigation, and highlighting services to strengthen the workshop's brand image and credibility." data-services="[&quot;Webdesign&quot;,&quot;Development&quot;]" data-categories="[&quot;website&quot;,&quot;branding&quot;,&quot;webdesign&quot;]" data-images="[&quot;/portfolio//wp-content/uploads/2026/02/home-1024x586.webp&quot;,&quot;/portfolio//wp-content/uploads/2026/01/LAMBERT-2-1024x614.jpg&quot;,&quot;/portfolio//wp-content/uploads/2026/02/page-1024x586.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/02/home-1024x586.webp" data-featured-video="/portfolio//wp-content/uploads/projects/performance-mtbnzj4b.mp4" data-featured-type="video" data-project-url="https://performance.lu/" role="button" tabindex="0" aria-label="Open project: Performance">
+          <div class="project-row__header">
+            <div class="project-row__left">
+              <span class="project-row__index unified-text">05</span>
+              <h2 class="project-row__title unified-text">Performance</h2>
+            </div>
+
+            <div class="project-row__right">
+              <span class="project-row__cta unified-text">SEE MORE</span>
+              <span class="project-row__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
+            </div>
+          </div>
+
+          <div class="project-row__media">
+            <img width="1024" height="586" src="/portfolio//wp-content/uploads/2026/02/home-1024x586.webp" class="project-row__media-el project-row__media-image" alt="Performance" loading="lazy" decoding="async" sizes="(max-width: 760px) 66vw, (max-width: 1200px) 32vw, 28vw">
+              <video src="/portfolio//wp-content/uploads/projects/performance-mtbnzj4b.mp4" poster="/portfolio//wp-content/uploads/2026/02/home-1024x586.webp" class="project-row__media-el project-row__media-video" muted loop playsinline preload="metadata" aria-label="Performance"></video>
+          </div>
+        </article>
+
+
+
+        <article class="project-row" data-project-row data-title="PICK Immobilier" data-description="Creation of a website for a real estate agency in Germany, focusing on showcasing properties and ensuring a clear user experience. The project involved effectively structuring property listings, optimizing property searches, and providing a reassuring and professional interface. The design was conceived to inspire confidence while facilitating contact." data-services="[&quot;Webdesign&quot;,&quot;Development&quot;]" data-categories="[&quot;webdesign&quot;]" data-images="[&quot;/portfolio//wp-content/uploads/2026/02/pick-1024x868.png&quot;,&quot;/portfolio//wp-content/uploads/2026/02/PICK-1-1024x614.jpg&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/02/pick-1024x868.png" data-featured-video="/portfolio//wp-content/uploads/projects/pick-hero-web-v3-mtbnrnpq.mp4" data-featured-type="video" data-project-url="" role="button" tabindex="0" aria-label="Open project: PICK Immobilier">
+          <div class="project-row__header">
+            <div class="project-row__left">
+              <span class="project-row__index unified-text">06</span>
+              <h2 class="project-row__title unified-text">PICK Immobilier</h2>
+            </div>
+
+            <div class="project-row__right">
+              <span class="project-row__cta unified-text">SEE MORE</span>
+              <span class="project-row__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
+            </div>
+          </div>
+
+          <div class="project-row__media">
+            <img width="1024" height="868" src="/portfolio//wp-content/uploads/2026/02/pick-1024x868.png" class="project-row__media-el project-row__media-image" alt="PICK Immobilier" loading="lazy" decoding="async" sizes="(max-width: 760px) 66vw, (max-width: 1200px) 32vw, 28vw">
+              <video src="/portfolio//wp-content/uploads/projects/pick-hero-web-v3-mtbnrnpq.mp4" poster="/portfolio//wp-content/uploads/2026/02/pick-1024x868.png" class="project-row__media-el project-row__media-video" muted loop playsinline preload="metadata" aria-label="PICK Immobilier"></video>
+          </div>
+        </article>
+
+
+
+        <article class="project-row" data-project-row data-title="Ludovissy" data-description="Design and development of a showcase website for a law firm, with particular attention paid to elegance, clarity of information, and visual credibility. The objective was to convey seriousness and legal expertise through a clean design, carefully chosen typography, and smooth navigation. The site was optimized to offer an intuitive user experience, facilitating access to areas of expertise and contact information." data-services="[&quot;Webdesign&quot;,&quot;Development&quot;]" data-categories="[&quot;website&quot;,&quot;webdesign&quot;]" data-images="[&quot;/portfolio//wp-content/uploads/2026/02/home-2-1024x586.webp&quot;,&quot;/portfolio//wp-content/uploads/2026/02/page-2-1024x586.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/02/home-2-1024x586.webp" data-featured-video="/portfolio//wp-content/uploads/projects/screen-recording-2026-08-27-at-17-07-07-mtbnwcgq.mp4" data-featured-type="video" data-project-url="https://ludovissy.lu/" role="button" tabindex="0" aria-label="Open project: Ludovissy">
+          <div class="project-row__header">
+            <div class="project-row__left">
+              <span class="project-row__index unified-text">07</span>
+              <h2 class="project-row__title unified-text">Ludovissy</h2>
+            </div>
+
+            <div class="project-row__right">
+              <span class="project-row__cta unified-text">SEE MORE</span>
+              <span class="project-row__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
+            </div>
+          </div>
+
+          <div class="project-row__media">
+            <img width="1024" height="586" src="/portfolio//wp-content/uploads/2026/02/home-2-1024x586.webp" class="project-row__media-el project-row__media-image" alt="Ludovissy" loading="lazy" decoding="async" sizes="(max-width: 760px) 66vw, (max-width: 1200px) 32vw, 28vw">
+              <video src="/portfolio//wp-content/uploads/projects/screen-recording-2026-08-27-at-17-07-07-mtbnwcgq.mp4" poster="/portfolio//wp-content/uploads/2026/02/home-2-1024x586.webp" class="project-row__media-el project-row__media-video" muted loop playsinline preload="metadata" aria-label="Ludovissy"></video>
+          </div>
+        </article>
+
+
+
+        <article class="project-row" hidden data-project-row data-title="Venom" data-description="" data-services="[&quot;Draw&quot;]" data-categories="[&quot;draw&quot;]" data-images="[&quot;/portfolio//wp-content/uploads/2026/05/venom-697x1024.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/05/venom-697x1024.webp" data-featured-video="" data-featured-type="image" data-project-url="" role="button" tabindex="0" aria-label="Open project: Venom">
+          <div class="project-row__header">
+            <div class="project-row__left">
+              <span class="project-row__index unified-text">08</span>
+              <h2 class="project-row__title unified-text">Venom</h2>
+            </div>
+
+            <div class="project-row__right">
+              <span class="project-row__cta unified-text">SEE MORE</span>
+              <span class="project-row__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
+            </div>
+          </div>
+
+          <div class="project-row__media">
+            <img width="697" height="1024" src="/portfolio//wp-content/uploads/2026/05/venom-697x1024.webp" class="project-row__media-el" alt="Venom" loading="lazy" decoding="async" sizes="(max-width: 760px) 54vw, (max-width: 1200px) 24vw, 22vw">
+          </div>
+        </article>
+
+
+
+        <article class="project-row" hidden data-project-row data-title="Album" data-description="" data-services="[&quot;Draw&quot;]" data-categories="[&quot;draw&quot;]" data-images="[&quot;/portfolio//wp-content/uploads/2026/05/une-vie-a-deux-1012x1024.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/05/une-vie-a-deux-1012x1024.webp" data-featured-video="" data-featured-type="image" data-project-url="" role="button" tabindex="0" aria-label="Open project: Album">
+          <div class="project-row__header">
+            <div class="project-row__left">
+              <span class="project-row__index unified-text">09</span>
+              <h2 class="project-row__title unified-text">Album</h2>
+            </div>
+
+            <div class="project-row__right">
+              <span class="project-row__cta unified-text">SEE MORE</span>
+              <span class="project-row__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
+            </div>
+          </div>
+
+          <div class="project-row__media">
+            <img width="1012" height="1024" src="/portfolio//wp-content/uploads/2026/05/une-vie-a-deux-1012x1024.webp" class="project-row__media-el" alt="Album" loading="lazy" decoding="async" sizes="(max-width: 760px) 54vw, (max-width: 1200px) 24vw, 22vw">
+          </div>
+        </article>
+
+
+
+        <article class="project-row" hidden data-project-row data-title="View from the window" data-description="" data-services="[&quot;Draw&quot;]" data-categories="[&quot;draw&quot;]" data-images="[&quot;/portfolio//wp-content/uploads/2026/05/landscape-1024x693.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/05/landscape-1024x693.webp" data-featured-video="" data-featured-type="image" data-project-url="" role="button" tabindex="0" aria-label="Open project: View from the window">
+          <div class="project-row__header">
+            <div class="project-row__left">
+              <span class="project-row__index unified-text">10</span>
+              <h2 class="project-row__title unified-text">View from the window</h2>
+            </div>
+
+            <div class="project-row__right">
+              <span class="project-row__cta unified-text">SEE MORE</span>
+              <span class="project-row__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
+            </div>
+          </div>
+
+          <div class="project-row__media">
+            <img width="1024" height="693" src="/portfolio//wp-content/uploads/2026/05/landscape-1024x693.webp" class="project-row__media-el" alt="View from the window" loading="lazy" decoding="async" sizes="(max-width: 760px) 54vw, (max-width: 1200px) 24vw, 22vw">
+          </div>
+        </article>
+
+
+
+        <article class="project-row" hidden data-project-row data-title="Logan" data-description="" data-services="[&quot;Draw&quot;]" data-categories="[&quot;draw&quot;]" data-images="[&quot;/portfolio//wp-content/uploads/2026/05/wolverine-702x1024.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/05/wolverine-702x1024.webp" data-featured-video="" data-featured-type="image" data-project-url="" role="button" tabindex="0" aria-label="Open project: Logan">
+          <div class="project-row__header">
+            <div class="project-row__left">
+              <span class="project-row__index unified-text">11</span>
+              <h2 class="project-row__title unified-text">Logan</h2>
+            </div>
+
+            <div class="project-row__right">
+              <span class="project-row__cta unified-text">SEE MORE</span>
+              <span class="project-row__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
+            </div>
+          </div>
+
+          <div class="project-row__media">
+            <img width="702" height="1024" src="/portfolio//wp-content/uploads/2026/05/wolverine-702x1024.webp" class="project-row__media-el" alt="Logan" loading="lazy" decoding="async" sizes="(max-width: 760px) 54vw, (max-width: 1200px) 24vw, 22vw">
+          </div>
+        </article>
+
+
+
+        <article class="project-row" hidden data-project-row data-title="Cat" data-description="" data-services="[&quot;Draw&quot;]" data-categories="[&quot;draw&quot;]" data-images="[&quot;/portfolio//wp-content/uploads/2026/05/cat-1024x724.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/05/cat-1024x724.webp" data-featured-video="" data-featured-type="image" data-project-url="" role="button" tabindex="0" aria-label="Open project: Cat">
+          <div class="project-row__header">
+            <div class="project-row__left">
+              <span class="project-row__index unified-text">12</span>
+              <h2 class="project-row__title unified-text">Cat</h2>
+            </div>
+
+            <div class="project-row__right">
+              <span class="project-row__cta unified-text">SEE MORE</span>
+              <span class="project-row__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
+            </div>
+          </div>
+
+          <div class="project-row__media">
+            <img width="1024" height="724" src="/portfolio//wp-content/uploads/2026/05/cat-1024x724.webp" class="project-row__media-el" alt="Cat" loading="lazy" decoding="async" sizes="(max-width: 760px) 54vw, (max-width: 1200px) 24vw, 22vw">
+          </div>
+        </article>
+
+
+
+        <article class="project-row" data-project-row data-title="EDI Madagascar" data-description="Development of a website for an NGO, with the aim of showcasing its mission, activities, and social impact. The project involved creating a clear structure to present the organization's projects, news, and ways to support it. Particular attention was paid to accessibility and readability to reach a broad, international audience." data-services="[&quot;Webdesign&quot;,&quot;Development&quot;]" data-categories="[&quot;webdesign&quot;]" data-images="[&quot;/portfolio//wp-content/uploads/2026/01/edi-1024x744.png&quot;,&quot;/portfolio//wp-content/uploads/2026/01/EDI-mob-1024x666.png&quot;,&quot;/portfolio//wp-content/uploads/2026/02/hero-1-1024x586.webp&quot;,&quot;/portfolio//wp-content/uploads/2026/02/home-1-1024x586.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/01/edi-1024x744.png" data-featured-video="" data-featured-type="image" data-project-url="https://edimadagascar.ong/" role="button" tabindex="0" aria-label="Open project: EDI Madagascar">
+          <div class="project-row__header">
+            <div class="project-row__left">
+              <span class="project-row__index unified-text">13</span>
+              <h2 class="project-row__title unified-text">EDI Madagascar</h2>
+            </div>
+
+            <div class="project-row__right">
+              <span class="project-row__cta unified-text">SEE MORE</span>
+              <span class="project-row__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
+            </div>
+          </div>
+
+          <div class="project-row__media">
+            <img width="1024" height="744" src="/portfolio//wp-content/uploads/2026/01/edi-1024x744.png" class="project-row__media-el" alt="EDI Madagascar" loading="lazy" decoding="async" sizes="(max-width: 760px) 54vw, (max-width: 1200px) 24vw, 22vw">
+          </div>
+        </article>
+
+
+
+        <article class="project-row" hidden data-project-row data-title="Alternative" data-description="" data-services="[&quot;Draw&quot;]" data-categories="[&quot;draw&quot;]" data-images="[&quot;/portfolio//wp-content/uploads/2026/05/alt-676x1024.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/05/alt-676x1024.webp" data-featured-video="" data-featured-type="image" data-project-url="" role="button" tabindex="0" aria-label="Open project: Alternative">
           <div class="project-row__header">
             <div class="project-row__left">
               <span class="project-row__index unified-text">14</span>
+              <h2 class="project-row__title unified-text">Alternative</h2>
+            </div>
+
+            <div class="project-row__right">
+              <span class="project-row__cta unified-text">SEE MORE</span>
+              <span class="project-row__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
+            </div>
+          </div>
+
+          <div class="project-row__media">
+            <img width="676" height="1024" src="/portfolio//wp-content/uploads/2026/05/alt-676x1024.webp" class="project-row__media-el" alt="Alternative" loading="lazy" decoding="async" sizes="(max-width: 760px) 54vw, (max-width: 1200px) 24vw, 22vw">
+          </div>
+        </article>
+
+
+
+        <article class="project-row" hidden data-project-row data-title="Batou" data-description="" data-services="[&quot;Draw&quot;]" data-categories="[&quot;draw&quot;]" data-images="[&quot;/portfolio//wp-content/uploads/2026/05/batou-722x1024.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/05/batou-722x1024.webp" data-featured-video="" data-featured-type="image" data-project-url="" role="button" tabindex="0" aria-label="Open project: Batou">
+          <div class="project-row__header">
+            <div class="project-row__left">
+              <span class="project-row__index unified-text">15</span>
               <h2 class="project-row__title unified-text">Batou</h2>
             </div>
 
@@ -439,15 +475,16 @@ CHALOPIN</span>
           </div>
 
           <div class="project-row__media">
-                          <img width="722" height="1024" src="/portfolio//wp-content/uploads/2026/05/batou-722x1024.webp" class="project-row__media-el" alt="Batou" loading="lazy" decoding="async" sizes="auto, (max-width: 760px) 54vw, (max-width: 1200px) 24vw, 22vw" srcset="/portfolio//wp-content/uploads/2026/05/batou-722x1024.webp 722w, /portfolio//wp-content/uploads/2026/05/batou-211x300.webp 211w, /portfolio//wp-content/uploads/2026/05/batou-768x1090.webp 768w, /portfolio//wp-content/uploads/2026/05/batou-1082x1536.webp 1082w, /portfolio//wp-content/uploads/2026/05/batou.webp 1353w">                      </div>
+            <img width="722" height="1024" src="/portfolio//wp-content/uploads/2026/05/batou-722x1024.webp" class="project-row__media-el" alt="Batou" loading="lazy" decoding="async" sizes="(max-width: 760px) 54vw, (max-width: 1200px) 24vw, 22vw">
+          </div>
         </article>
 
-       
-      
-        <article class="project-row" data-project-row data-title="CIGL Dudelange" data-description="The Centre for Local Initiative and Management (CIGL Dudelange asbl), created in 1998, is a social initiative committed to socio-professional integration." data-services="[&quot;Webdesign&quot;,&quot;Development&quot;,&quot;Graphisme&quot;,&quot;Branding&quot;]" data-images="[&quot;\/portfolio\/\/wp-content\/uploads\/2026\/01\/back-min-1024x683.jpg&quot;,&quot;\/portfolio\/\/wp-content\/uploads\/2026\/01\/home-1-1024x586.webp&quot;,&quot;\/portfolio\/\/wp-content\/uploads\/2026\/01\/CIGL-mob-1024x614.jpg&quot;,&quot;\/portfolio\/\/wp-content\/uploads\/2026\/01\/page-1-1024x586.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/01/back-min-1024x683.jpg" data-featured-video="" data-featured-type="image" role="button" tabindex="0" aria-label="Open project: CIGL Dudelange">
+
+
+        <article class="project-row" data-project-row data-title="CIGL Dudelange" data-description="The Centre for Local Initiative and Management (CIGL Dudelange asbl), created in 1998, is a social initiative committed to socio-professional integration." data-services="[&quot;Webdesign&quot;,&quot;Development&quot;,&quot;Graphisme&quot;,&quot;Branding&quot;]" data-categories="[&quot;website&quot;,&quot;webdesign&quot;]" data-images="[&quot;/portfolio//wp-content/uploads/2026/01/back-min-1024x683.jpg&quot;,&quot;/portfolio//wp-content/uploads/2026/01/home-1-1024x586.webp&quot;,&quot;/portfolio//wp-content/uploads/2026/01/CIGL-mob-1024x614.jpg&quot;,&quot;/portfolio//wp-content/uploads/2026/01/page-1-1024x586.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/2026/01/back-min-1024x683.jpg" data-featured-video="/portfolio//wp-content/uploads/projects/screen-recording-2026-08-27-at-16-42-29-mtbnakcx.mp4" data-featured-type="video" data-project-url="https://cigldiddeleng.lu/" role="button" tabindex="0" aria-label="Open project: CIGL Dudelange">
           <div class="project-row__header">
             <div class="project-row__left">
-              <span class="project-row__index unified-text">15</span>
+              <span class="project-row__index unified-text">16</span>
               <h2 class="project-row__title unified-text">CIGL Dudelange</h2>
             </div>
 
@@ -458,18 +495,33 @@ CHALOPIN</span>
           </div>
 
           <div class="project-row__media">
-                          <img width="1024" height="683" src="/portfolio//wp-content/uploads/2026/01/back-min-1024x683.jpg" class="project-row__media-el" alt="CIGL Dudelange" loading="lazy" decoding="async" sizes="auto, (max-width: 760px) 54vw, (max-width: 1200px) 24vw, 22vw" srcset="/portfolio//wp-content/uploads/2026/01/back-min-1024x683.jpg 1024w, /portfolio//wp-content/uploads/2026/01/back-min-300x200.jpg 300w, /portfolio//wp-content/uploads/2026/01/back-min-768x512.jpg 768w, /portfolio//wp-content/uploads/2026/01/back-min-1536x1024.jpg 1536w, /portfolio//wp-content/uploads/2026/01/back-min-2048x1365.jpg 2048w">                      </div>
+            <img width="1024" height="683" src="/portfolio//wp-content/uploads/2026/01/back-min-1024x683.jpg" class="project-row__media-el project-row__media-image" alt="CIGL Dudelange" loading="lazy" decoding="async" sizes="(max-width: 760px) 66vw, (max-width: 1200px) 32vw, 28vw">
+              <video src="/portfolio//wp-content/uploads/projects/screen-recording-2026-08-27-at-16-42-29-mtbnakcx.mp4" poster="/portfolio//wp-content/uploads/2026/01/back-min-1024x683.jpg" class="project-row__media-el project-row__media-video" muted loop playsinline preload="metadata" aria-label="CIGL Dudelange"></video>
+          </div>
+        </article>
+
+
+
+        <article class="project-row" data-project-row data-title="Batiself" data-description="" data-services="[&quot;Website&quot;,&quot;Webdesign&quot;]" data-categories="[&quot;website&quot;,&quot;webdesign&quot;]" data-images="[&quot;/portfolio//wp-content/uploads/projects/screenshot-2026-08-27-at-16-44-02-mtcs0i2h.webp&quot;,&quot;/portfolio//wp-content/uploads/projects/screenshot-2026-08-27-at-16-44-18-mtcs0ia0.webp&quot;,&quot;/portfolio//wp-content/uploads/projects/screenshot-2026-08-27-at-16-44-30-mtcs0ihx.webp&quot;]" data-main-image="/portfolio//wp-content/uploads/projects/screenshot-2026-08-27-at-16-44-02-mtcs0i2h.webp" data-featured-video="/portfolio//wp-content/uploads/projects/screen-recording-2026-08-28-at-11-56-07-mtcs2hvx.mp4" data-featured-type="video" data-project-url="" role="button" tabindex="0" aria-label="Open project: Batiself">
+          <div class="project-row__header">
+            <div class="project-row__left">
+              <span class="project-row__index unified-text">17</span>
+              <h2 class="project-row__title unified-text">Batiself</h2>
+            </div>
+
+            <div class="project-row__right">
+              <span class="project-row__cta unified-text">SEE MORE</span>
+              <span class="project-row__arrow" style="--arrow-mask: url('/portfolio//wp-content/uploads/2026/01/arrow.png');" aria-hidden="true"></span>
+            </div>
+          </div>
+
+          <div class="project-row__media">
+            <img width="2400" height="1273" src="/portfolio//wp-content/uploads/projects/screenshot-2026-08-27-at-16-44-02-mtcs0i2h.webp" class="project-row__media-el project-row__media-image" alt="Batiself" loading="lazy" decoding="async" sizes="(max-width: 760px) 66vw, (max-width: 1200px) 32vw, 28vw">
+              <video src="/portfolio//wp-content/uploads/projects/screen-recording-2026-08-28-at-11-56-07-mtcs2hvx.mp4" poster="/portfolio//wp-content/uploads/projects/screenshot-2026-08-27-at-16-44-02-mtcs0i2h.webp" class="project-row__media-el project-row__media-video" muted loop playsinline preload="metadata" aria-label="Batiself"></video>
+          </div>
         </article>
 
             </div>
-  <div class="snake-zoom" data-snake-zoom-control>
-    <input class="snake-zoom__range" type="range" min="0" max="100" value="50" step="1" aria-label="Adjust gallery zoom" data-snake-zoom>
-    <div class="snake-zoom__ticks" aria-hidden="true">
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
-  </div>
 </main>
 
 <div class="pmodal" id="pmodal" aria-hidden="true">
@@ -481,6 +533,8 @@ CHALOPIN</span>
     </button>
 
     <div class="pmodal__layout">
+      <h2 class="pmodal__mobile-title" data-pmodal-mobile-title></h2>
+
       <div class="pmodal__media-col">
         <div class="pmodal__media-stage" data-pmodal-stage></div>
         <div class="pmodal__captures" data-pmodal-captures></div>
@@ -499,6 +553,10 @@ CHALOPIN</span>
           <h3 class="pmodal__label">DESCRIPTION</h3>
           <p class="pmodal__desc" data-pmodal-desc></p>
         </div>
+
+        <div class="pmodal__block pmodal__website-block" data-pmodal-website-block hidden>
+          <a class="pmodal__website-link" data-pmodal-website target="_blank" rel="noopener noreferrer">View website</a>
+        </div>
       </div>
     </div>
   </div>
@@ -507,9 +565,9 @@ CHALOPIN</span>
 <script type="speculationrules">
 {"prefetch":[{"source":"document","where":{"and":[{"href_matches":"/alexy/*"},{"not":{"href_matches":["/alexy/wp-*.php","/alexy/wp-admin/*","/alexy/wp-content/uploads/*","/alexy/wp-content/*","/alexy/wp-content/plugins/*","/alexy/wp-content/themes/childtheme/*","/alexy/wp-content/themes/twentytwentyfive/*","/alexy/*\\?(.+)"]}},{"not":{"selector_matches":"a[rel~=\"nofollow\"]"}},{"not":{"selector_matches":".no-prefetch, .no-prefetch a"}}]},"eagerness":"conservative"}]}
 </script>
-<script id="header-ui-js" src="/portfolio//wp-content/themes/childtheme/assets/js/header-ui.js?ver=1780050112"></script>
+<script id="header-ui-js" src="/portfolio//wp-content/themes/childtheme/assets/js/header-ui.js?ver=1787748600"></script>
 <script id="gsap-js" src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js?ver=3.12.5"></script>
-<script id="home-projects-js" src="/portfolio//wp-content/themes/childtheme/assets/js/home-projects.js?ver=1787667600"></script>
+<script id="home-projects-js" src="/portfolio//wp-content/themes/childtheme/assets/js/vinyl-list.js?ver=1787884018"></script>
 <script id="wp-emoji-settings" type="application/json">
 {"baseUrl":"https://s.w.org/images/core/emoji/17.0.2/72x72/","ext":".png","svgUrl":"https://s.w.org/images/core/emoji/17.0.2/svg/","svgExt":".svg","source":{"concatemoji":"/portfolio//wp-includes/js/wp-emoji-release.min.js?ver=7.0"}}
 </script>
