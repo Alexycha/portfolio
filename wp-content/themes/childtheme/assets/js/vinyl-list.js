@@ -30,25 +30,33 @@
   };
 
   const CONFIG = {
-    pitchRatio: 0.105,          // scroll distance per card = viewport height * ratio
+    pitchRatio: 0.105,          // scroll distance per sleeve = viewport height * ratio
     pitchMin: 64,
     pitchMax: 118,
-    stepXRatio: 0.095,
-    stepYRatio: 0.15,
-    mobileStepXRatio: 0.135,
-    mobileStepYRatio: 0.11,
-    skew: 9.5,                  // panels recede toward the upper-right (top edge falls to the right)
-    ease: 0.11,                 // lerp toward target — light inertia, still responsive
+    // The crate: one straight diagonal through the centre of the screen, bottom-left in front.
+    // `card` is the sleeve width, `stepX` / `stepY` the offset between two sleeves, `pullX` /
+    // `pullY` how far a hovered sleeve slides out — all as fractions of the viewport.
+    desktop: { card: 0.21, maxHeight: 0.36, stepX: 0.095, stepY: 0.15, pullX: 0.084, pullY: 0.022 },
+    mobile: { card: 0.58, maxHeight: 0.3, stepX: 0.135, stepY: 0.11, pullX: 0.1, pullY: 0.02 },
+    cardRatio: 1.3,             // one shared sleeve format (media is cropped to fit)
+    skew: 10,                   // sleeves lean back along the rail (skewY, deg)
+    depth: 0.012,               // front sleeves sit a touch larger than the ones behind
+    reach: 6,                   // sleeves further than this from the centre are not drawn
+    part: 0.55,                 // hovering a sleeve parts its neighbours by this many steps …
+    partReach: 1.6,             // … fading over this many sleeves
+    // Motion
+    introShift: 7,              // steps the crate slides in along its diagonal on load
+    ease: 5.5,                  // scroll smoothing (1/s), frame-rate independent
+    speedRef: 9,                // steps/s that count as "full speed" for the effects below
+    stretch: 0.06,              // the row loosens a little at speed
+    sway: 3,                    // sleeves tip (deg) with the scroll, on a spring
+    swaySpring: 70,
+    swayDamping: 9.5,
     wheelSpeed: 0.85,
     dragSpeed: 1.05,
     momentum: 12,
     dragClickSuppressMs: 260,
-    hoverXRatio: 0.084,
-    hoverXMin: 72,
-    hoverXMax: 340,
-    hoverYRatio: 0.022,
-    hoverYMin: 14,
-    hoverYMax: 90,
+    hoverScale: 0.018,
     hoverSpring: 178,
     hoverDamping: 20,
     hoverLabelOffsetX: 14,
@@ -187,7 +195,7 @@
   };
 
   /* =====================================================
-     VINYL LIST — continuous diagonal rail
+     VINYL LIST — a crate of sleeves on one diagonal rail
   ===================================================== */
   class VinylList {
     constructor() {
@@ -202,42 +210,43 @@
         return isVisible;
       });
       this.logicalCount = this.rows.length;
-      this.mediaRatios = this.rows.map(row => {
-        const media = qs(SELECTORS.rowMediaEl, row);
-        return getMediaNaturalRatio(media) || getMediaDeclaredRatio(media) || 1;
-      });
-      const visualRows = this.rows.flatMap((row, index) => {
-        const makeClone = copyOffset => {
-          const clone = row.cloneNode(true);
-          clone.dataset.railClone = String(copyOffset);
-          clone.setAttribute('aria-hidden', 'true');
-          clone.setAttribute('tabindex', '-1');
-          this.wrapper.appendChild(clone);
-          return { row: clone, railIndex: index, copyOffset, isClone: true };
-        };
-        return [
-          makeClone(-1),
-          { row, railIndex: index, copyOffset: 0, isClone: false },
-          makeClone(1),
-        ];
-      });
-      this.items = visualRows.map(visual => ({
-        ...visual,
-        row: visual.row,
-        media: qs(SELECTORS.rowMedia, visual.row),
-        hit: null,
-        finalWidth: 0,
-        finalRatio: 1,
-        introStackIndex: 0,
-        hover: 0,
-        hoverTarget: 0,
-        hoverVelocity: 0,
-        introOpacity: 1,
-        introClip: 0,
-      }));
+      // Only as many copies of the list as the visible stretch of rail needs (usually one).
+      this.copies = Math.max(1, Math.ceil((CONFIG.reach * 2) / Math.max(1, this.logicalCount)));
+      this.items = [];
+      for (let copy = 0; copy < this.copies; copy += 1) {
+        this.rows.forEach((source, railIndex) => {
+          let row = source;
+          if (copy > 0) {
+            row = source.cloneNode(true);
+            row.dataset.railClone = String(copy);
+            row.setAttribute('aria-hidden', 'true');
+            row.setAttribute('tabindex', '-1');
+            this.wrapper.appendChild(row);
+          }
+          this.items.push({
+            row,
+            railIndex,
+            copy,
+            media: qs(SELECTORS.rowMedia, row),
+            hit: null,
+            culled: false,
+            t: 0,
+            hover: 0,
+            hoverTarget: 0,
+            hoverVelocity: 0,
+            last: {},
+          });
+        });
+      }
       this.viewport = getViewportState();
       this.offset = 0;
       this.target = 0;
+      this.time = 0;
+      this.speed = 0;
+      this.lastFlow = 0;
+      this.sway = 0;
+      this.swayVelocity = 0;
+      this.dirty = false;
       this.focusedIndex = -1;
       this.lastInputTime = 0;
       this.lastDragEnd = 0;
@@ -255,12 +264,7 @@
       this.hoverLabelTargetX = 0;
       this.hoverLabelTargetY = 0;
       this.hoverLabelReady = false;
-      this.introState = {
-        active: true,
-        angle: 0,
-        rotation: 0,
-        spread: 0,
-      };
+      this.introState = { shift: 0, alpha: 1 };
     }
 
     get pitch() {
@@ -280,23 +284,9 @@
       });
       this.createHitLayer();
       this.sizeCards();
-      this.rows.forEach((row, index) => {
-        const media = qs(SELECTORS.rowMediaEl, row);
-        const syncRatio = () => {
-          const ratio = getMediaNaturalRatio(media) || getMediaDeclaredRatio(media);
-          if (!ratio || Math.abs(ratio - this.mediaRatios[index]) < 0.001) return;
-          this.mediaRatios[index] = ratio;
-          this.sizeCards();
-          this.render(true);
-        };
-        media?.addEventListener?.('load', syncRatio, { once: true });
-        media?.addEventListener?.('loadedmetadata', syncRatio, { once: true });
-        media?.decode?.().then(syncRatio).catch(() => {});
-      });
       this.bindEvents();
       this.modal = new VinylModal(this);
       this.modal.init();
-      this.render(true);
       this.intro();
       const loop = now => {
         this.tick(now);
@@ -331,32 +321,19 @@
       this.container.appendChild(this.hoverLabel);
     }
 
-    // Keep the visual rhythm varied while preserving every artwork's real aspect ratio.
+    // Every sleeve shares one format.
     sizeCards() {
-      const WIDTHS = [0.23, 0.225, 0.25, 0.22, 0.215, 0.235, 0.245, 0.22];
       const { width, height, isMobile } = this.viewport;
-      const boost = isMobile ? 2.5 : 1;
-      const maxH = height * (isMobile ? 0.54 : 0.6);
-      const maxW = width * (isMobile ? 0.7 : 0.29);
-      this.introSquareSize = Math.round(Math.min(
-        width * (isMobile ? 0.54 : 0.18),
-        height * (isMobile ? 0.32 : 0.28),
-      ));
+      const shape = isMobile ? CONFIG.mobile : CONFIG.desktop;
+      const ratio = CONFIG.cardRatio;
+      const w = `${Math.round(Math.min(width * shape.card, height * shape.maxHeight * ratio))}px`;
 
       this.items.forEach(item => {
-        const ratio = this.mediaRatios[item.railIndex] || 1;
-        let w = width * WIDTHS[item.railIndex % WIDTHS.length] * boost;
-        w = Math.min(w, maxW, maxH * ratio);
-
-        item.finalWidth = Math.round(w);
-        item.finalRatio = ratio;
-        const initialWidth = this.introState.active ? this.introSquareSize : item.finalWidth;
-        const initialRatio = this.introState.active ? 1 : item.finalRatio;
-        item.row.style.width = `${initialWidth}px`;
-        item.media.style.aspectRatio = String(initialRatio);
-        item.hit.style.width = `${initialWidth}px`;
-        item.hit.style.aspectRatio = String(initialRatio);
-        item.row.dataset.railFormat = ratio < 1 ? 'portrait' : 'landscape';
+        item.row.style.width = w;
+        item.media.style.aspectRatio = String(ratio);
+        item.hit.style.width = w;
+        item.hit.style.aspectRatio = String(ratio);
+        item.row.dataset.railFormat = 'landscape';
       });
     }
 
@@ -578,119 +555,121 @@
 
     tick(now = performance.now()) {
       const dt = this.lastFrameTime
-        ? clamp(0.001, 0.032, (now - this.lastFrameTime) / 1000)
+        ? clamp(0.001, 0.05, (now - this.lastFrameTime) / 1000)
         : 1 / 60;
       this.lastFrameTime = now;
+      this.time = now / 1000;
       this.updateHoverLabel();
       const hoverMoving = this.updateHover(dt);
 
-      // no snap — the rail glides freely; lerp gives the inertia
+      // no snap — the rail glides freely; exponential smoothing gives the inertia
       const delta = this.target - this.offset;
-      if (Math.abs(delta) < 0.015) {
-        if (this.offset !== this.target) {
-          this.offset = this.target;
-          this.render();
-        } else if (hoverMoving) {
-          this.render();
-        }
+      const scrolling = Math.abs(delta) >= 0.015;
+      if (scrolling) this.offset += delta * (this.reduced ? 1 : 1 - Math.exp(-CONFIG.ease * dt));
+      else this.offset = this.target;
+
+      if (this.reduced) {
+        if (scrolling || hoverMoving || this.dirty) this.render();
+        this.dirty = scrolling;
         return;
       }
-      this.offset += delta * (this.reduced ? 1 : CONFIG.ease);
+
+      // How fast the rail flows past the focus plane (steps/s), intro included. The cards
+      // answer on a spring: they swing with the motion and settle with a soft overshoot.
+      const flow = (this.offset / this.pitch) + this.introState.shift;
+      const speed = (flow - this.lastFlow) / dt;
+      this.lastFlow = flow;
+      this.speed += (speed - this.speed) * (1 - Math.exp(-14 * dt));
+      const swayTarget = clamp(-1, 1, this.speed / CONFIG.speedRef);
+      this.swayVelocity += (((swayTarget - this.sway) * CONFIG.swaySpring) - (this.swayVelocity * CONFIG.swayDamping)) * dt;
+      this.sway += this.swayVelocity * dt;
       this.render();
     }
 
     render(force = false) {
       if (!force && (this.modal?.isAnimating || this.modal?.isPopupOpen)) return;
       const { width, height, isMobile } = this.viewport;
-      const pitch = this.pitch;
-      // one straight rail through the viewport center: constant vector, regular steps
-      const stepX = width * (isMobile ? CONFIG.mobileStepXRatio : CONFIG.stepXRatio);
-      const stepY = height * (isMobile ? CONFIG.mobileStepYRatio : CONFIG.stepYRatio);
-      const span = this.span;
-      const half = span / 2;
-      const hoverX = clamp(CONFIG.hoverXMin, CONFIG.hoverXMax, width * CONFIG.hoverXRatio);
-      const hoverY = clamp(CONFIG.hoverYMin, CONFIG.hoverYMax, width * CONFIG.hoverYRatio);
-      const intro = this.introState;
-      const spread = intro.active ? intro.spread : 1;
-      const angle = intro.active ? intro.angle : 1;
-      const introRotation = intro.active ? intro.rotation : 0;
+      const shape = isMobile ? CONFIG.mobile : CONFIG.desktop;
+      const stepX = width * shape.stepX;
+      const stepY = height * shape.stepY;
+      const pullX = width * shape.pullX;
+      const pullY = width * shape.pullY;
+      const count = this.logicalCount;
+      const total = count * this.copies;
+      const half = total / 2;
+      const { shift, alpha } = this.introState;
+      const sway = this.reduced ? 0 : this.sway;
+      const stretch = 1 + (CONFIG.stretch * Math.min(1, Math.abs(sway)));
+      const skew = (CONFIG.skew + (sway * CONFIG.sway)).toFixed(2);
+      const progress = this.offset / this.pitch;
+
+      // global progression + index offset, wrapped for the infinite loop and centred:
+      // t = 0 is the middle of the screen, t < 0 the front of the crate (bottom-left)
+      let open = null;
+      this.items.forEach(item => {
+        const t = progress - item.railIndex + (item.copy * count);
+        item.t = ((((t + half) % total) + total) % total) - half;
+        if (item.hover > 0.001 && (!open || item.hover > open.hover)) open = item;
+      });
+      const openAmount = open ? Math.min(1, open.hover) : 0;
 
       this.items.forEach(item => {
-        // global progression + index offset, wrapped for the infinite loop,
-        // centered so t=0 sits at the middle of the viewport
-        let raw = this.offset - (item.railIndex * pitch);
-        raw = ((raw % span) + span) % span;            // [0, span)
-        if (raw > half) raw -= span;                   // (-half, half]
-        raw += item.copyOffset * span;
-        const t = raw / pitch;
-        const a = Math.abs(t);
-        const cardWidth = this.introSquareSize + ((item.finalWidth - this.introSquareSize) * spread);
-        const cardRatio = 1 + ((item.finalRatio - 1) * spread);
-        const widthValue = `${cardWidth.toFixed(2)}px`;
-        const ratioValue = cardRatio.toFixed(4);
-        item.row.style.width = widthValue;
-        item.media.style.aspectRatio = ratioValue;
-        item.hit.style.width = widthValue;
-        item.hit.style.aspectRatio = ratioValue;
+        let t = item.t;
+        // flipping through: the sleeves around the hovered one move apart to show it
+        if (open && item !== open) {
+          const gap = t - open.t;
+          t += Math.sign(gap) * CONFIG.part * openAmount * Math.exp(-Math.abs(gap) / CONFIG.partReach);
+        }
+        t = (t + shift) * stretch;
 
-        if (intro.active && item.isClone) {
-          item.row.style.visibility = 'hidden';
-          item.hit.style.visibility = 'hidden';
-          return;
+        const opacity = clamp(0, 1, (CONFIG.reach - Math.abs(t)) / 0.6) * alpha;
+        const last = item.last;
+
+        // off-screen: skip the paint entirely
+        const culled = opacity <= 0.004;
+        if (culled !== item.culled) {
+          item.culled = culled;
+          item.row.style.visibility = culled ? 'hidden' : '';
+          item.hit.style.visibility = culled ? 'hidden' : '';
+        }
+        if (culled) return;
+
+        const hover = clamp(0, 1.06, item.hover);
+        const x = (t * stepX) + (pullX * hover);
+        const y = (-t * stepY) + (pullY * hover);
+        const scale = clamp(0.9, 1.08, 1 - (t * CONFIG.depth)) * (1 + (CONFIG.hoverScale * hover));
+        const transform =
+          `translate(-50%, -50%) translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0) skewY(${skew}deg) scale(${scale.toFixed(4)})`;
+        if (transform !== last.transform) {
+          last.transform = transform;
+          item.row.style.transform = transform;
+          // Keep the invisible interaction surface welded to the animated sleeve.
+          item.hit.style.transform = transform;
         }
 
-        if (item.row.style.visibility === 'hidden') item.row.style.visibility = '';
-        if (item.hit.style.visibility === 'hidden') item.hit.style.visibility = '';
-
-        const x = t * stepX * spread;                  // the centered stack opens onto the rail
-        const y = -t * stepY * spread;
-        const stackDepth = item.introStackIndex - ((this.logicalCount - 1) / 2);
-        const stackGapX = isMobile ? 0.78 : 1.18;
-        const stackGapY = isMobile ? 0.64 : 0.92;
-        const stackGapProgress = angle * (1 - spread);
-        const stackX = -stackDepth * stackGapX * stackGapProgress;
-        const stackY = stackDepth * stackGapY * stackGapProgress;
-        // Lower-left panels sit fractionally nearer; upper-right panels recede.
-        // The small depth cue keeps the rail directional without breaking its line.
-        const scale = clamp(0.9, 1.02, 0.995 - (t * 0.01) - (a * 0.004));
-        const hoverProgress = clamp(0, 1.06, item.hover) * spread;
-        const hoverEase = hoverProgress;
-        const visualX = x + stackX + (hoverX * hoverEase);
-        const visualY = y + stackY + (hoverY * hoverEase);
-        const railScale = scale * (1 + (0.018 * hoverEase));
-        const visualScale = 1 + ((railScale - 1) * spread);
-
-        // bottom-left (t < 0) passes in front of the run continuing up-right
-        const baseZ = 500 - Math.round(t * 12);
-        const zIndex = intro.active && spread < 0.5 ? 650 + item.introStackIndex : baseZ;
-        const skew = CONFIG.skew * angle;
-        item.row.style.zIndex = String(zIndex);
-        item.hit.style.zIndex = String(zIndex);
-        item.row.style.transform =
-          `translate(-50%, -50%) translate3d(${visualX.toFixed(2)}px, ${visualY.toFixed(2)}px, 0) rotate(${introRotation.toFixed(2)}deg) skewY(${skew.toFixed(2)}deg) scale(${visualScale.toFixed(4)})`;
-        // Keep the invisible interaction surface welded to the animated card.
-        // This prevents the card's former position from remaining hoverable.
-        item.hit.style.transform =
-          `translate(-50%, -50%) translate3d(${visualX.toFixed(2)}px, ${visualY.toFixed(2)}px, 0) rotate(${introRotation.toFixed(2)}deg) skewY(${skew.toFixed(2)}deg) scale(${visualScale.toFixed(4)})`;
-        item.row.style.opacity = item.introOpacity.toFixed(3);
-        if (intro.active) {
-          const clip = clamp(0, 50, item.introClip);
-          const clipPath = clip > 0.01 ? `inset(${clip.toFixed(2)}%)` : 'inset(0%)';
-          item.row.style.clipPath = clipPath;
-          item.row.style.webkitClipPath = clipPath;
+        const opacityValue = opacity.toFixed(3);
+        if (opacityValue !== last.opacity) {
+          last.opacity = opacityValue;
+          item.row.style.opacity = opacityValue;
         }
-        item.media.style.opacity = '';
-        item.media.style.filter = '';
+
+        // front of the crate (bottom-left) paints over the sleeves behind it
+        const zIndex = 500 - Math.round(t * 12);
+        if (zIndex !== last.zIndex) {
+          last.zIndex = zIndex;
+          item.row.style.zIndex = String(zIndex);
+          item.hit.style.zIndex = String(zIndex);
+        }
       });
 
-      const count = this.logicalCount;
-      const focused = ((Math.round(this.offset / pitch) % count) + count) % count;
+      const focused = ((Math.round(progress) % count) + count) % count;
       if (focused !== this.focusedIndex) {
         this.focusedIndex = focused;
         this.rows.forEach((row, i) => row.classList.toggle('is-focused', i === focused));
       }
     }
 
+    // The crate slides in along its diagonal and settles.
     intro() {
       const root = document.documentElement;
       const headerBits = [
@@ -698,81 +677,39 @@
         ...qsa(SELECTORS.headerControl),
         ...qsa(SELECTORS.headerBottomItem),
       ].filter(Boolean);
+      const release = () => document.body.classList.remove('is-home-intro-running');
 
       gsap.set(this.wrapper, { autoAlpha: 1 });
-      gsap.set(headerBits, { autoAlpha: 0 });
-      document.body.classList.add('is-home-intro-running');
-
-      const railPosition = item => {
-        let raw = this.offset - (item.railIndex * this.pitch);
-        raw = ((raw % this.span) + this.span) % this.span;
-        if (raw > this.span / 2) raw -= this.span;
-        return raw / this.pitch;
-      };
-      const introItems = this.items.filter(item => !item.isClone).sort((a, b) => railPosition(b) - railPosition(a));
-      introItems.forEach((item, stackIndex) => { item.introStackIndex = stackIndex; });
-      this.items.forEach(item => {
-        item.introOpacity = 0;
-        item.introClip = 50;
-      });
-      Object.assign(this.introState, { active: true, angle: 0, rotation: 0, spread: 0 });
-      this.render(true);
-      root.classList.remove('is-home-intro-prep');
 
       if (this.reduced) {
-        this.items.forEach(item => {
-          item.introOpacity = 1;
-          item.introClip = 0;
-        });
-        Object.assign(this.introState, { active: false, angle: 1, rotation: 0, spread: 1 });
-        gsap.set(headerBits, { autoAlpha: 1 });
-        document.body.classList.remove('is-home-intro-running');
         this.render(true);
+        root.classList.remove('is-home-intro-prep');
         return;
       }
 
-      const revealStagger = this.viewport.isMobile ? 0.065 : 0.075;
-      const revealStart = 0.04;
-      const angleStart = revealStart + (Math.max(0, introItems.length - 1) * revealStagger) + 0.34;
-      const spreadStart = angleStart + 0.56;
+      gsap.set(headerBits, { autoAlpha: 0 });
+      document.body.classList.add('is-home-intro-running');
+      Object.assign(this.introState, { shift: CONFIG.introShift, alpha: 0 });
+      this.lastFlow = (this.offset / this.pitch) + CONFIG.introShift;
+      this.render(true);
+      root.classList.remove('is-home-intro-prep');
+
+      // tick() renders every frame, so the timeline only has to move the numbers
       const tl = gsap.timeline({
-        onUpdate: () => this.render(true),
         onComplete: () => {
-          this.introState.active = false;
-          this.items.forEach(item => {
-            item.introOpacity = 1;
-            item.row.style.removeProperty('clip-path');
-            item.row.style.removeProperty('-webkit-clip-path');
-          });
-          document.body.classList.remove('is-home-intro-running');
-          this.render(true);
+          Object.assign(this.introState, { shift: 0, alpha: 1 });
+          release();
         },
       });
-      tl.to(introItems, {
-        introOpacity: 1,
-        introClip: 0,
-        duration: 0.52,
-        stagger: revealStagger,
-        ease: 'power4.out',
-      }, revealStart);
-      tl.to(this.introState, {
-        angle: 1,
-        rotation: -5.5,
-        duration: 0.72,
-        ease: 'power3.inOut',
-      }, angleStart);
-      tl.to(this.introState, {
-        spread: 1,
-        rotation: 0,
-        duration: 1.14,
-        ease: 'power4.inOut',
-      }, spreadStart);
+      tl.to(this.introState, { shift: 0, duration: 2.6, ease: 'expo.out' }, 0.1);
+      tl.to(this.introState, { alpha: 1, duration: 0.9, ease: 'power2.out' }, 0.1);
+      tl.call(release, null, 1.3);
       tl.to(headerBits, {
         autoAlpha: 1,
         duration: 0.5,
         stagger: 0.045,
         clearProps: 'opacity,visibility',
-      }, spreadStart + 0.34);
+      }, 0.9);
     }
   }
 
@@ -917,11 +854,8 @@
       this.listTransitionMedia = visibleItems.map(item => item.media);
       const exitTargets = new Map(visibleItems.map((item, index) => {
         const rect = item.media.getBoundingClientRect();
-        const rowTransform = getComputedStyle(item.row).transform;
-        const matrix = rowTransform && rowTransform !== 'none'
-          ? new DOMMatrixReadOnly(rowTransform)
-          : null;
-        const verticalScale = Math.max(0.5, matrix ? Math.hypot(matrix.c, matrix.d) : 1);
+        // on-screen size / layout size: the camera scales each card differently
+        const verticalScale = Math.max(0.05, rect.height / (item.media.offsetHeight || rect.height || 1));
         const edgeClearance = Math.max(180, window.innerHeight * 0.15);
         const direction = rect.left + (rect.width / 2) < window.innerWidth / 2 ? -1 : 1;
         const drift = direction * (22 + ((index % 3) * 9));
@@ -1082,12 +1016,7 @@
         gsap.set(transitionMedia, {
           y: (index, media) => {
             const rect = media.getBoundingClientRect();
-            const row = media.closest(SELECTORS.row);
-            const rowTransform = row ? getComputedStyle(row).transform : 'none';
-            const matrix = rowTransform && rowTransform !== 'none'
-              ? new DOMMatrixReadOnly(rowTransform)
-              : null;
-            const verticalScale = Math.max(0.5, matrix ? Math.hypot(matrix.c, matrix.d) : 1);
+            const verticalScale = Math.max(0.05, rect.height / (media.offsetHeight || rect.height || 1));
             const edgeClearance = Math.max(180, window.innerHeight * 0.15);
             return (window.innerHeight - rect.top + edgeClearance) / verticalScale;
           },
