@@ -295,6 +295,7 @@ img, video {
 .site-header__top { 
   display: flex; 
   align-items: center; 
+  min-height: var(--tap-target); /* same row height as the theme button: one centre line */
   gap: clamp(22px, 1.8vw, 31px);
   max-width: calc(100vw - (var(--header-pad-x) * 2) - 116px);
 }
@@ -975,8 +976,11 @@ body.is-snake-view .media-slider-home {
   top: calc(var(--header-pad-y) + var(--safe-top));
   right: calc(var(--header-pad-x) + var(--safe-right));
   z-index: 2;
-  min-width: 44px;
-  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: var(--tap-target);
+  min-height: var(--tap-target); /* same row as the header controls */
   color: var(--text);
   pointer-events: auto;
 }
@@ -1080,11 +1084,14 @@ body.is-snake-view .media-slider-home {
 
 .pmodal__close {
   position: fixed;
-  top: 40px;
-  right: 56px;
+  top: calc(var(--header-pad-y) + var(--safe-top));
+  right: calc(var(--header-pad-x) + var(--safe-right));
   z-index: 30;
-  min-width: 44px;
-  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: var(--tap-target);
+  min-height: var(--tap-target);
   font-size: 14px;
   font-weight: var(--fw-semibold);
   letter-spacing: 0.1em;
@@ -1420,9 +1427,12 @@ body.is-snake-view .media-slider-home {
     justify-content: flex-start;
   }
 
+  /* here the project scrolls under the fixed close button: give it a backing so it stays legible */
   .pmodal__close {
-    top: calc(24px + var(--safe-top));
-    right: calc(24px + var(--safe-right));
+    right: calc(var(--header-pad-x) + var(--safe-right) - 12px);
+    padding: 0 12px;
+    border-radius: 999px;
+    background: var(--bg);
   }
 }
 
@@ -1730,13 +1740,6 @@ body.is-snake-view .media-slider-home {
       calc(14px + var(--safe-left));
   }
 
-  .pmodal__close {
-    top: calc(18px + var(--safe-top));
-    right: calc(14px + var(--safe-right));
-    font-size: 11px;
-    min-width: 40px;
-    min-height: 40px;
-  }
 
   .pmodal__thumb {
     flex-basis: 68px;
@@ -1859,11 +1862,6 @@ body.is-snake-view .media-slider-home {
   .project-row { 
     margin-right: 0; 
   }
-
-  .pmodal__close {
-    right: 24px;
-    top: 30px;
-  }
 }
 
 body *:not(.home-projects__title):not(.home-projects__title *):not(.pmodal__title):not(.pmodal__title *):not(.pmodal__mobile-title):not(.pmodal__mobile-title *):not(.mini-modal__title):not(.mini-modal__title *) {
@@ -1954,18 +1952,30 @@ body.is-vinyl-view .home-projects {
 }
 
 body.is-vinyl-view .home-projects__wrapper {
+  /* height of the header / footer bands the sleeves fade out under */
+  --chrome-top: calc(var(--header-pad-y) + var(--safe-top) + var(--tap-target));
+  --chrome-bottom: calc(56px + var(--safe-bottom));
+  --chrome-mask: linear-gradient(to bottom,
+    transparent 0,
+    #000 calc(var(--chrome-top) + 32px),
+    #000 calc(100% - var(--chrome-bottom) - 48px),
+    transparent calc(100% - var(--chrome-bottom)));
   position: absolute;
   inset: 0;
   display: block;
   height: 100%;
   padding: 0;
   pointer-events: auto;
-  cursor: grab;
   touch-action: none;
+  /* sleeves dissolve under the header and footer, so the chrome always stays legible */
+  -webkit-mask-image: var(--chrome-mask);
+  mask-image: var(--chrome-mask);
 }
 
-body.is-vinyl-view .home-projects__wrapper:active {
-  cursor: grabbing;
+@media (max-width: 760px) {
+  body.is-vinyl-view .home-projects__wrapper {
+    --chrome-bottom: calc(86px + var(--safe-bottom));
+  }
 }
 
 /* Every card shares the same center anchor; the intro stacks them there before
@@ -2071,8 +2081,8 @@ body.is-vinyl-view .vinyl-hover-label {
   align-items: baseline;
   gap: 7px;
   max-width: min(38vw, 360px);
-  color: #000;
-  font-family: var(--font-title);
+  color: var(--text);
+  font-family: var(--font-title) !important; /* the global Helvetica reset would win otherwise */
   font-size: clamp(14px, 1.05vw, 18px);
   font-weight: 400;
   letter-spacing: 0;
@@ -2102,8 +2112,9 @@ body.is-vinyl-view .vinyl-hover-label:not(.is-visible) {
 body.is-vinyl-view .vinyl-hover-label *,
 body.is-vinyl-view .vinyl-hover-label__index,
 body.is-vinyl-view .vinyl-hover-label__title {
-  color: #000;
+  color: inherit;
   font: inherit;
+  font-family: inherit !important;
   letter-spacing: inherit;
   line-height: inherit;
 }
@@ -2151,7 +2162,7 @@ body.is-vinyl-view .project-row__media-video {
   object-fit: cover;
 }
 
-body.is-vinyl-view .project-row.is-hovered .project-row__media-video {
+body.is-vinyl-view .project-row.is-hovered.is-video-live .project-row__media-video {
   opacity: 1;
 }
 
@@ -2263,7 +2274,7 @@ body.is-vinyl-view .header-item {
 body.is-vinyl-view .site-header__bottom .header-item__text {
   font-family: var(--font-title) !important;
   font-size: clamp(14px, 1.05vw, 18px);
-  color: #000000 !important;
+  color: var(--text) !important;
   font-weight: 400;
   letter-spacing: 0 !important;
   line-height: 1;

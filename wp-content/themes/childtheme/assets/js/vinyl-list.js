@@ -34,10 +34,12 @@
     pitchMin: 64,
     pitchMax: 118,
     // The crate: one straight diagonal through the centre of the screen, bottom-left in front.
-    // `card` is the sleeve width, `stepX` / `stepY` the offset between two sleeves, `pullX` /
-    // `pullY` how far a hovered sleeve slides out — all as fractions of the viewport.
-    desktop: { card: 0.21, maxHeight: 0.36, stepX: 0.095, stepY: 0.15, pullX: 0.084, pullY: 0.022 },
-    mobile: { card: 0.58, maxHeight: 0.3, stepX: 0.135, stepY: 0.11, pullX: 0.1, pullY: 0.02 },
+    // `card` / `maxHeight` size the sleeve (fractions of the viewport width / height); `stepX` /
+    // `stepY` (offset between two sleeves) and `pullX` / `pullY` (how far a hovered sleeve slides
+    // out) are fractions of the sleeve width, so the crate keeps its overlap on any screen.
+    // Portrait screens (phones, upright tablets) use the steeper `portrait` crate.
+    landscape: { card: 0.21, maxHeight: 0.36, stepX: 0.45, stepY: 0.43, pullX: 0.4, pullY: 0.1 },
+    portrait: { card: 0.58, maxHeight: 0.3, stepX: 0.23, stepY: 0.41, pullX: 0.17, pullY: 0.035 },
     cardRatio: 1.3,             // one shared sleeve format (media is cropped to fit)
     skew: 10,                   // sleeves lean back along the rail (skewY, deg)
     depth: 0.012,               // front sleeves sit a touch larger than the ones behind
@@ -247,6 +249,11 @@
       this.sway = 0;
       this.swayVelocity = 0;
       this.dirty = false;
+      this.wasMoving = false;
+      this.restRendered = false;
+      this.cardWidth = 300;
+      this.canHover = false;
+      this.pointer = null;
       this.focusedIndex = -1;
       this.lastInputTime = 0;
       this.lastDragEnd = 0;
@@ -321,12 +328,18 @@
       this.container.appendChild(this.hoverLabel);
     }
 
+    get shape() {
+      const { width, height, isMobile } = this.viewport;
+      return isMobile || width / height < 0.85 ? CONFIG.portrait : CONFIG.landscape;
+    }
+
     // Every sleeve shares one format.
     sizeCards() {
-      const { width, height, isMobile } = this.viewport;
-      const shape = isMobile ? CONFIG.mobile : CONFIG.desktop;
+      const { width, height } = this.viewport;
+      const shape = this.shape;
       const ratio = CONFIG.cardRatio;
-      const w = `${Math.round(Math.min(width * shape.card, height * shape.maxHeight * ratio))}px`;
+      this.cardWidth = Math.round(Math.min(width * shape.card, height * shape.maxHeight * ratio));
+      const w = `${this.cardWidth}px`;
 
       this.items.forEach(item => {
         item.row.style.width = w;
@@ -344,14 +357,23 @@
         item.hoverTarget = itemIndex === index ? 1 : 0;
         item.row.classList.toggle('is-hovered', itemIndex === index);
         const video = qs('.project-row__media-video', item.row);
-        if (video && itemIndex === index) safePlay(video);
-        else if (video) video.pause();
+        if (video && itemIndex === index) {
+          // reveal the clip only once frames are actually moving, never a blank buffering frame
+          const reveal = () => { if (item.row.classList.contains('is-hovered')) item.row.classList.add('is-video-live'); };
+          if (!video.paused && video.currentTime > 0) reveal();
+          else video.addEventListener('timeupdate', reveal, { once: true });
+          safePlay(video);
+        } else if (video) {
+          video.pause();
+          item.row.classList.remove('is-video-live');
+        }
       });
 
       if (this.hoverLabel) {
         const row = index >= 0 ? this.items[index]?.row : null;
         if (row) {
-          this.hoverLabelIndex.textContent = qs('.project-row__index', row)?.textContent?.trim() || String(index + 1).padStart(2, '0');
+          // numbered in the order shown, not by the hidden source list (which skips filtered projects)
+          this.hoverLabelIndex.textContent = String(this.items[index].railIndex + 1).padStart(2, '0');
           this.hoverLabelTitle.textContent = qs('.project-row__title', row)?.textContent?.trim() || row.dataset.title || '';
           this.hoverLabel.classList.add('is-visible');
           this.hoverLabel.setAttribute('aria-hidden', 'false');
@@ -426,8 +448,24 @@
         || document.body.classList.contains('is-home-intro-running');
     }
 
+    // After the crate stops under a still pointer, hover whatever sleeve is now beneath it.
+    rehover() {
+      if (!this.canHover || !this.pointer || this.isBusy()) return;
+      const hit = document.elementFromPoint(this.pointer.x, this.pointer.y);
+      const index = hit?.classList?.contains('vinyl-hit-target') ? Number(hit.dataset.hitIndex) : -1;
+      this.setHoveredIndex(index);
+      if (index >= 0) this.setHoverLabelPosition(null, true);
+    }
+
     bindEvents() {
       const canHover = window.matchMedia?.('(hover: hover) and (pointer: fine)')?.matches;
+      this.canHover = canHover;
+      if (canHover) {
+        window.addEventListener('pointermove', event => {
+          this.pointer = { x: event.clientX, y: event.clientY };
+        }, { passive: true });
+        document.documentElement.addEventListener('pointerleave', () => { this.pointer = null; });
+      }
       this.items.forEach((item, index) => {
         if (canHover) {
           item.hit.addEventListener('pointerenter', event => {
@@ -567,6 +605,10 @@
       const scrolling = Math.abs(delta) >= 0.015;
       if (scrolling) this.offset += delta * (this.reduced ? 1 : 1 - Math.exp(-CONFIG.ease * dt));
       else this.offset = this.target;
+      // hover is dropped while the crate moves; pick it back up once it has nearly settled
+      const settling = Math.abs(delta) > this.pitch * 0.04;
+      if (this.wasMoving && !settling) this.rehover();
+      this.wasMoving = settling;
 
       if (this.reduced) {
         if (scrolling || hoverMoving || this.dirty) this.render();
@@ -583,17 +625,32 @@
       const swayTarget = clamp(-1, 1, this.speed / CONFIG.speedRef);
       this.swayVelocity += (((swayTarget - this.sway) * CONFIG.swaySpring) - (this.swayVelocity * CONFIG.swayDamping)) * dt;
       this.sway += this.swayVelocity * dt;
+
+      // at rest (no scroll, hover, sway or intro in flight) there is nothing to redraw
+      const resting = !scrolling && !hoverMoving
+        && Math.abs(this.sway) < 0.0005 && Math.abs(this.swayVelocity) < 0.0005
+        && this.introState.shift === 0 && this.introState.alpha === 1;
+      if (resting) {
+        if (this.sway !== 0 || !this.restRendered) {
+          this.sway = 0;
+          this.swayVelocity = 0;
+          this.render();
+          this.restRendered = true;
+        }
+        return;
+      }
+      this.restRendered = false;
       this.render();
     }
 
     render(force = false) {
       if (!force && (this.modal?.isAnimating || this.modal?.isPopupOpen)) return;
-      const { width, height, isMobile } = this.viewport;
-      const shape = isMobile ? CONFIG.mobile : CONFIG.desktop;
-      const stepX = width * shape.stepX;
-      const stepY = height * shape.stepY;
-      const pullX = width * shape.pullX;
-      const pullY = width * shape.pullY;
+      const shape = this.shape;
+      const card = this.cardWidth;
+      const stepX = card * shape.stepX;
+      const stepY = card * shape.stepY;
+      const pullX = card * shape.pullX;
+      const pullY = card * shape.pullY;
       const count = this.logicalCount;
       const total = count * this.copies;
       const half = total / 2;
@@ -635,16 +692,21 @@
         if (culled) return;
 
         const hover = clamp(0, 1.06, item.hover);
-        const x = (t * stepX) + (pullX * hover);
-        const y = (-t * stepY) + (pullY * hover);
-        const scale = clamp(0.9, 1.08, 1 - (t * CONFIG.depth)) * (1 + (CONFIG.hoverScale * hover));
-        const transform =
-          `translate(-50%, -50%) translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0) skewY(${skew}deg) scale(${scale.toFixed(4)})`;
+        const pose = (pt, ph) => {
+          const scale = clamp(0.9, 1.08, 1 - (pt * CONFIG.depth)) * (1 + (CONFIG.hoverScale * ph));
+          return `translate(-50%, -50%) translate3d(${((pt * stepX) + (pullX * ph)).toFixed(2)}px, ${((-pt * stepY) + (pullY * ph)).toFixed(2)}px, 0) skewY(${skew}deg) scale(${scale.toFixed(4)})`;
+        };
+        const transform = pose(t, hover);
         if (transform !== last.transform) {
           last.transform = transform;
           item.row.style.transform = transform;
-          // Keep the invisible interaction surface welded to the animated sleeve.
-          item.hit.style.transform = transform;
+        }
+        // The interaction surface stays on the sleeve's resting slot: if it followed the
+        // pulled-out sleeve, the pointer would fall off it and the sleeve would snap back.
+        const hitTransform = pose((item.t + shift) * stretch, 0);
+        if (hitTransform !== last.hitTransform) {
+          last.hitTransform = hitTransform;
+          item.hit.style.transform = hitTransform;
         }
 
         const opacityValue = opacity.toFixed(3);
@@ -658,7 +720,11 @@
         if (zIndex !== last.zIndex) {
           last.zIndex = zIndex;
           item.row.style.zIndex = String(zIndex);
-          item.hit.style.zIndex = String(zIndex);
+        }
+        const hitZ = 500 - Math.round(item.t * 12);
+        if (hitZ !== last.hitZ) {
+          last.hitZ = hitZ;
+          item.hit.style.zIndex = String(hitZ);
         }
       });
 
@@ -889,7 +955,8 @@
         autoAlpha: isMobileDetail ? 0 : 1,
         y: isMobileDetail ? 28 : infoEnterY,
       });
-      gsap.set(this.els.title, { autoAlpha: isMobileDetail ? 0 : 1 });
+      // the stylesheet parks the title 24px low for its entrance; the info column carries it in
+      gsap.set(this.els.title, { autoAlpha: isMobileDetail ? 0 : 1, y: 0 });
       gsap.set(blocks, {
         autoAlpha: isMobileDetail ? 0 : 1,
         y: isMobileDetail ? 18 : 0,
